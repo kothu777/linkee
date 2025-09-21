@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom"
+import { createHashRouter, RouterProvider } from "react-router-dom"
 import AuthLayout from "./Layouts/AuthLayout"
 import MainLayout from "./Layouts/MainLayout"
 import LoginPage from "./pages/LoginPage"
@@ -10,7 +10,7 @@ import NotFoundPage from "./pages/NotFoundPage"
 
 
 function App() {
-const router = createBrowserRouter([
+const router = createHashRouter([
   {path: "", element:<AuthLayout/>, children:[
     {path: "login", element:<LoginPage/>},
     {path: "register", element:<RegisterPage/>},
