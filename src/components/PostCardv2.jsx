@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Image } from "@heroui/react";
 import { useTimeAgo } from "../hooks/useTimeAgo";
+import Comment from "./Comment";
 export default function PostCardV2({ post }) {
   const [isLiked, setIsLiked] = useState(false);
-  const [isLikedComment, setIsLikedComment] = useState(false);
+
   const [isPinging, setIsPinging] = useState(false);
-  const [isPingingComment, setIsPingingComment] = useState(false);
   const formatTimeAgo = useTimeAgo();
   return (
     <article className="mb-4 break-inside p-6 max-w-xl shadow-xl rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex flex-col bg-clip-border">
@@ -33,10 +33,10 @@ export default function PostCardV2({ post }) {
       <p className="dark:text-slate-200">{post?.body}</p>
       <div className="py-4">
         {post?.image && (
-          <div className="flex justify-between gap-1 mb-1">
+          <div className=" flex justify-center mb-1 w-full">
             <Image
               alt="post image"
-              className="max-w-full rounded-tl-lg"
+              className="max-w-full rounded-tl-lg object-cover"
               src={post?.image}
             />
           </div>
@@ -96,52 +96,7 @@ export default function PostCardV2({ post }) {
       {post?.comments && (
         <div className="pt-6">
           {/* Comment row */}
-          <div className="media flex pb-4">
-            <Image
-              alt="user avatar"
-              className="rounded-full"
-              src="https://linked-posts.routemisr.com/uploads/default-profile.png"
-              height={40}
-              width={40}
-            />
-            <div className="media-body">
-              <div>
-                <h1 className="inline-block text-base font-bold mr-2">
-                  {post?.comments[0]?.commentCreator?.name}
-                </h1>
-                <small className="text-slate-500 text-xs dark:text-slate-300">
-                  {formatTimeAgo(post?.comments[0]?.createdAt)}
-                </small>
-              </div>
-              <p>{post?.comments[0]?.content}</p>
-              <div className="mt-2 flex items-center">
-                <Link
-                  className="inline-flex items-center py-2 mr-3"
-                  to="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setIsLikedComment((prev) => !prev);
-                    setIsPingingComment(true);
-                    setTimeout(() => setIsPingingComment(false), 700);
-                  }}
-                >
-                  <span className="mr-2">
-                    <svg
-                      className={`${
-                        isLikedComment
-                          ? "fill-rose-600 dark:fill-rose-400 transition-all duration-300"
-                          : "fill-slate-500 dark:fill-slate-300"
-                      } ${isPingingComment ? "animate-ping" : ""}`}
-                      style={{ width: 22, height: 22 }}
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z"></path>
-                    </svg>
-                  </span>
-                </Link>
-              </div>
-            </div>
-          </div>
+         <Comment comment={post?.comments[0]} />
           {/* End comments row */}
 
           {/* More comments */}
