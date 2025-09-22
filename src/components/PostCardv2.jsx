@@ -42,29 +42,39 @@ export default function PostCardV2({ post }) {
           </div>
         )}
       </div>
-
-      <div
-        className=" cursor-pointer w-fit "
-        onClick={() => {
-          setIsLiked(!isLiked);
-          setIsPinging(true);
-          setTimeout(() => setIsPinging(false), 700);
-        }}
-      >
-        <span className="mr-2">
-          <svg
-            className={`${
-              isLiked
-                ? "fill-rose-600 dark:fill-rose-400 transition-all duration-300"
-                : "fill-slate-500 dark:fill-slate-300"
-            } ${isPinging ? "animate-ping" : ""}`}
-            style={{ width: 30, height: 30 }}
-            viewBox="0 0 24 24"
-          >
-            <path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z"></path>
-          </svg>
-        </span>
-      </div>
+      <section className="flex items-center justify-between">
+        <div
+          className=" cursor-pointer w-fit "
+          onClick={() => {
+            setIsLiked(!isLiked);
+            setIsPinging(true);
+            setTimeout(() => setIsPinging(false), 700);
+          }}
+        >
+          <span className="mr-2">
+            <svg
+              className={`${
+                isLiked
+                  ? "fill-rose-600 dark:fill-rose-400 transition-all duration-300"
+                  : "fill-slate-500 dark:fill-slate-300"
+              } ${isPinging ? "animate-ping" : ""}`}
+              style={{ width: 30, height: 30 }}
+              viewBox="0 0 24 24"
+            >
+              <path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z"></path>
+            </svg>
+          </span>
+        </div>
+        <Link
+              to={`/post-details/${post?.id}`}
+              className="cursor-pointer"
+            >
+          <i className="fa-regular fa-comment"></i>
+          {`${post?.comments?.length || 0} Comment${
+            post?.comments?.length > 1 ? "s" : ""
+          }`}
+        </Link>
+      </section>
 
       <div className="relative">
         <input
@@ -93,16 +103,16 @@ export default function PostCardV2({ post }) {
         </span>
       </div>
       {/* Comments content */}
-      {post?.comments && (
+      {post.comments.length > 0 && (
         <div className="pt-6">
           {/* Comment row */}
-         <Comment comment={post?.comments[0]} />
+          <Comment comment={post?.comments[0]} />
           {/* End comments row */}
 
           {/* More comments */}
           <div className="w-full">
             <Link
-              to={`/post/${post?.id}`}
+              to={`/post-details/${post?.id}`}
               className="py-3 px-4 w-full block bg-slate-100 dark:bg-slate-700 text-center rounded-lg font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition ease-in-out delay-75"
             >
               Show more comments

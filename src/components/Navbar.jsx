@@ -69,7 +69,7 @@ export default function AppNavbar() {
 
   return (
     <>
-      <Navbar className="shadow bg-slate-100">
+      <Navbar className="shadow bg-slate-100/10 dark:bg-slate-900/80">
         <NavbarBrand>
           <Link to="/" className="flex items-center">
             <LinkeeLogo />
