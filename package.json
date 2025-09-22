@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.0.1",
+    "@heroui/card": "^2.2.24",
     "@heroui/kbd": "^2.2.21",
     "@heroui/navbar": "^2.2.24",
     "@heroui/react": "^2.8.4",
