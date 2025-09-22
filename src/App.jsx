@@ -9,6 +9,8 @@ import ProfilePage from "./pages/ProfilePage";
 import NotFoundPage from "./pages/NotFoundPage";
 import ProtectedRoute from "./ProtectedRoutes/ProtectedRoute";
 import ProtectedAuthRoute from "./ProtectedRoutes/ProtectedAuthRoute";
+import React from "react";
+
 
 function App() {
   const router = createHashRouter([
