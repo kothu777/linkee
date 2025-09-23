@@ -65,10 +65,7 @@ export default function PostCardV2({ post }) {
             </svg>
           </span>
         </div>
-        <Link
-              to={`/post-details/${post?.id}`}
-              className="cursor-pointer"
-            >
+        <Link to={`/post-details/${post?.id}`} className="cursor-pointer">
           <i className="fa-regular fa-comment"></i>
           {`${post?.comments?.length || 0} Comment${
             post?.comments?.length > 1 ? "s" : ""
@@ -104,9 +101,12 @@ export default function PostCardV2({ post }) {
       </div>
       {/* Comments content */}
       {post.comments.length > 0 && (
-        <div className="pt-6">
+        <div className="pt-6 flex flex-col">
           {/* Comment row */}
-          <Comment comment={post?.comments[0]} />
+          <div className="flex flex-col gap-4 mb-4 ">
+            <Comment comments={post?.comments} commentsLimit={2} />
+          </div>
+
           {/* End comments row */}
 
           {/* More comments */}

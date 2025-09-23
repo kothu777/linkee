@@ -3,17 +3,17 @@ import { getSinglePostsAPI } from "../Services/PostsService";
 import { useEffect, useState } from "react";
 import SpinnerComponent from "../components/SpinnerComponent";
 import ErrorPage from "./ErrorPage";
-import { Image } from "@heroui/react";
-import React from "react";
+import { Button, Image } from "@heroui/react";
 import { useTimeAgo } from "../hooks/useTimeAgo";
 import Comment from "../components/Comment";
+
 export default function PostDetailsPage() {
   const { id } = useParams();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
   const [isLiked, setIsLiked] = useState(false);
-
+  const [commentsLimit, setCommentsLimit] = useState(2);
   const [isPinging, setIsPinging] = useState(false);
   const formatTimeAgo = useTimeAgo();
   useEffect(() => {
@@ -36,6 +36,18 @@ export default function PostDetailsPage() {
       fetchPost();
     }
   }, [id]);
+  const handleShowMoreComments = () => {
+    try {
+      setLoading(true);
+      setErrorMessage(null);
+      setCommentsLimit((prev) => prev + 5);
+    } catch (error) {
+      console.error("Error showing more comments:", error);
+      setErrorMessage(error?.response?.data?.error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -140,12 +152,24 @@ export default function PostDetailsPage() {
           {post.comments.length > 0 ? (
             <div className="pt-6">
               {/* Comment row */}
-              {post.comments.map((comment) => {
-                return <Comment comment={comment} />;
-              })}
+              <Comment
+                comments={post?.comments}
+                commentsLimit={commentsLimit}
+              />
               {/* End comments row */}
+              {post.comments.length > commentsLimit && (
+                <div className="flex justify-center">
+                  <Button
+                    onPress={() => {
+                      handleShowMoreComments();
+                    }}
+                  >
+                    Show More Comments
+                  </Button>
+                </div>
+             ) }
             </div>
-          ):(
+          ) : (
             <div className="pt-6">
               <div className="text-center py-8">
                 <svg
