@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { getAllPostsAPI } from "../Services/PostsService";
 import PostCardV2 from "../components/PostCardv2";
 import SkeletonCard from "../components/SkeletonCard";
+import CreatePost from "../components/CreatePost";
 
 export default function FeedPage() {
   const [posts, setPosts] = useState([]);
@@ -22,7 +23,7 @@ export default function FeedPage() {
       // First, get page 1 to determine total pages
       const initialResponse = await getAllPostsAPI(1, POSTS_PER_PAGE);
       const paginationInfo = initialResponse?.paginationInfo;
-      
+
       if (!paginationInfo?.numberOfPages) {
         throw new Error("Unable to get pagination info");
       }
@@ -35,10 +36,16 @@ export default function FeedPage() {
       const postsData = response?.posts;
 
       // Sort posts by createdAt date (newest first) and sort comments within each post
-      const sortedPosts = postsData?.map(post => ({
-        ...post,
-        comments: post.comments?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) || []
-      })).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) || [];
+      const sortedPosts =
+        postsData
+          ?.map((post) => ({
+            ...post,
+            comments:
+              post.comments?.sort(
+                (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+              ) || [],
+          }))
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) || [];
 
       setPosts(sortedPosts);
       setCurrentPage(lastPage);
@@ -75,17 +82,24 @@ export default function FeedPage() {
 
       if (newPosts && newPosts.length > 0) {
         // Sort new posts by createdAt date (newest first) and sort comments within each post
-        const sortedNewPosts = newPosts.map(post => ({
-          ...post,
-          comments: post.comments?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) || []
-        })).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        
+        const sortedNewPosts = newPosts
+          .map((post) => ({
+            ...post,
+            comments:
+              post.comments?.sort(
+                (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+              ) || [],
+          }))
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
         setPosts((prevPosts) => {
           // Add older posts at the end, maintain chronological order
           const allPosts = [...prevPosts, ...sortedNewPosts];
-          return allPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          return allPosts.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          );
         });
-        
+
         setCurrentPage(previousPage);
 
         // Check if there are more pages to load (going backwards)
@@ -206,6 +220,9 @@ export default function FeedPage() {
   // Posts display
   return (
     <div className="grid gap-3 mx-auto min-h-screen items-start justify-center p-3 pt-8">
+      {/* Create Post */}
+      <CreatePost />
+
       {/* Posts list */}
       {posts.map((post, index) => (
         <div key={`${post?.id}-${index}`}>

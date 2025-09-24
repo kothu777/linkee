@@ -83,7 +83,7 @@ useEffect(() => {
               </div>
             </div>
           </div>
-          <p className="dark:text-slate-200">{post?.body}</p>
+          <p className="dark:text-slate-200 break-words">{post?.body}</p>
           <div className="py-4">
             {post?.image && (
               <div className=" flex justify-center mb-1 w-full">
