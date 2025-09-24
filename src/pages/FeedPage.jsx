@@ -8,32 +8,43 @@ export default function FeedPage() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(null); // Will be set to last page
   const [hasNextPage, setHasNextPage] = useState(true);
   const loadMoreRef = useRef(null);
   const POSTS_PER_PAGE = 10;
 
-  // Initial posts fetch
+  // Initial posts fetch - start from the last page to get newest posts
   const fetchInitialPosts = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await getAllPostsAPI(1, POSTS_PER_PAGE);
-      // Handle different response structures
-      const postsData = response?.posts;
-      const totalPosts = response?.paginationInfo?.total;
-
-      setPosts(postsData);
-      setCurrentPage(1);
-
-      // Check if there are more posts to load
-      if (totalPosts) {
-        setHasNextPage(postsData.length < totalPosts);
-      } else {
-        // If no total count, assume there might be more if we got a full page
-        setHasNextPage(postsData.length === POSTS_PER_PAGE);
+      // First, get page 1 to determine total pages
+      const initialResponse = await getAllPostsAPI(1, POSTS_PER_PAGE);
+      const paginationInfo = initialResponse?.paginationInfo;
+      
+      if (!paginationInfo?.numberOfPages) {
+        throw new Error("Unable to get pagination info");
       }
+
+      const lastPage = paginationInfo.numberOfPages;
+      // Note: We only need lastPage for initial setup, not storing totalPages
+
+      // Now fetch the last page (newest posts)
+      const response = await getAllPostsAPI(lastPage, POSTS_PER_PAGE);
+      const postsData = response?.posts;
+
+      // Sort posts by createdAt date (newest first) and sort comments within each post
+      const sortedPosts = postsData?.map(post => ({
+        ...post,
+        comments: post.comments?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) || []
+      })).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) || [];
+
+      setPosts(sortedPosts);
+      setCurrentPage(lastPage);
+
+      // Check if there are more posts to load (going backwards)
+      setHasNextPage(lastPage > 1);
     } catch (err) {
       console.error("Error fetching initial posts:", err);
       setError("Failed to load posts. Please try again.");
@@ -46,30 +57,39 @@ export default function FeedPage() {
     fetchInitialPosts();
   }, []);
 
-  // Load more posts function
+  // Load more posts function - goes backwards through pages
   const loadMorePosts = useCallback(async () => {
-    if (loadingMore || !hasNextPage) return;
+    if (loadingMore || !hasNextPage || currentPage === null) return;
 
     try {
       setLoadingMore(true);
-      const nextPage = currentPage + 1;
+      const previousPage = currentPage - 1; // Go backwards
 
-      const response = await getAllPostsAPI(nextPage, POSTS_PER_PAGE);
+      if (previousPage < 1) {
+        setHasNextPage(false);
+        return;
+      }
+
+      const response = await getAllPostsAPI(previousPage, POSTS_PER_PAGE);
       const newPosts = response?.posts;
-      const totalPosts = response?.paginationInfo?.total;
 
       if (newPosts && newPosts.length > 0) {
-        setPosts((prevPosts) => [...prevPosts, ...newPosts]);
-        setCurrentPage(nextPage);
+        // Sort new posts by createdAt date (newest first) and sort comments within each post
+        const sortedNewPosts = newPosts.map(post => ({
+          ...post,
+          comments: post.comments?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) || []
+        })).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        setPosts((prevPosts) => {
+          // Add older posts at the end, maintain chronological order
+          const allPosts = [...prevPosts, ...sortedNewPosts];
+          return allPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        });
+        
+        setCurrentPage(previousPage);
 
-        // Update hasNextPage based on response
-        if (totalPosts) {
-          const totalLoadedPosts = posts.length + newPosts.length;
-          setHasNextPage(totalLoadedPosts < totalPosts);
-        } else {
-          // If no total count, check if we got a full page
-          setHasNextPage(newPosts.length === POSTS_PER_PAGE);
-        }
+        // Check if there are more pages to load (going backwards)
+        setHasNextPage(previousPage > 1);
       } else {
         // No more posts available
         setHasNextPage(false);
@@ -80,7 +100,7 @@ export default function FeedPage() {
     } finally {
       setLoadingMore(false);
     }
-  }, [currentPage, loadingMore, hasNextPage, posts.length]);
+  }, [currentPage, loadingMore, hasNextPage]);
 
   // IntersectionObserver for infinite scroll
   useEffect(() => {
@@ -199,7 +219,7 @@ export default function FeedPage() {
           <div className="flex items-center justify-center gap-3">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
             <span className="text-slate-500 dark:text-slate-400">
-              Loading more posts...
+              Loading older posts...
             </span>
           </div>
         </div>
@@ -213,7 +233,7 @@ export default function FeedPage() {
           style={{ minHeight: "50px" }}
         >
           <div className="flex items-center justify-center">
-            <span>Scroll for more posts...</span>
+            <span>Scroll for older posts...</span>
           </div>
         </div>
       )}

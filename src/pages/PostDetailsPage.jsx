@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { getSinglePostsAPI } from "../Services/PostsService";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import SpinnerComponent from "../components/SpinnerComponent";
 import ErrorPage from "./ErrorPage";
 import { Button, Image } from "@heroui/react";
@@ -17,26 +17,29 @@ export default function PostDetailsPage() {
   const [commentsLimit, setCommentsLimit] = useState(2);
   const [isPinging, setIsPinging] = useState(false);
   const formatTimeAgo = useTimeAgo();
-  useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        setLoading(true);
-        setErrorMessage(null);
+  
+const fetchPost = useCallback(async () => {
+  try {
+    setLoading(true);
+    setErrorMessage(null);
 
-        const { post } = await getSinglePostsAPI(id);
-        setPost(post);
-      } catch (error) {
-        console.error("Error fetching post:", error);
-        setErrorMessage(error?.response?.data?.error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const { post } = await getSinglePostsAPI(id);
+    setPost(post);
+  } catch (error) {
+    console.error("Error fetching post:", error);
+    setErrorMessage(error?.response?.data?.error);
+  } finally {
+    setLoading(false);
+  }
+}, [id]);
 
-    if (id) {
-      fetchPost();
-    }
-  }, [id]);
+useEffect(() => {
+  if (id) {
+    fetchPost();
+  }
+}, [id, fetchPost]);
+
+  
   const handleShowMoreComments = () => {
     try {
       setLoading(true);
@@ -126,7 +129,7 @@ export default function PostDetailsPage() {
           </section>
           {/* ================= Comment section  =================*/}
           <div className="pt-4 flex flex-col gap-4">
-            <AddCommentField postId={post?._id} />
+            <AddCommentField postId={post?._id} onCommentAdded={fetchPost} />
             {/* Comments content */}
             {post.comments.length > 0 ? (
               <div className="pt-4 flex flex-col gap-4">

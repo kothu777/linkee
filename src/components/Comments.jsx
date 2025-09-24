@@ -1,3 +1,4 @@
+
 import { Divider } from "@heroui/react";
 import SingleComments from "./SingleComments";
 
@@ -6,16 +7,19 @@ export default function Comment({ comments, commentsLimit = 2 }) {
 
   return (
     <>
-      {comments.slice(0, commentsLimit).map((comment, index) => {
-        return (
-          <div key={comment._id} className="comment flex flex-col gap-1">
-            <SingleComments comment={comment} />
-            {index + 1 !== commentsLimit && (
-              <Divider className="mb-3 w-4/5 mx-auto" />
-            )}
-          </div>
-        );
-      })}
+      {comments
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) 
+        .slice(0, commentsLimit) 
+        .map((comment, index) => {
+          return (
+            <div key={comment._id} className="comment flex flex-col gap-1">
+              <SingleComments comment={comment} />
+              {index + 1 !== commentsLimit && (
+                <Divider className="mb-3 w-4/5 mx-auto" />
+              )}
+            </div>
+          );
+        })}
     </>
   );
 }
