@@ -50,7 +50,7 @@ export default function RegisterPage() {
       });
 
       setTimeout(() => {
-        navigate("/login");
+        navigate("/login", { replace: true });
       }, 1000);
     } catch (error) {
       let errorMessage =
@@ -210,6 +210,7 @@ export default function RegisterPage() {
             Already have an account?{" "}
             <Link
               to={"/login"}
+              replace
               className="text-blue-600 hover:text-blue-700 cursor-pointer font-medium"
             >
               Sign in here

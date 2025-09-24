@@ -16,7 +16,7 @@ import {
   ModalFooter,
   useDisclosure,
 } from "@heroui/react";
-import React, { useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { AuthContext } from "../contexts/authContext";
@@ -51,7 +51,7 @@ export default function AppNavbar() {
   const handleLogout = () => {
     removeStoredToken();
     setIsLoggedIn(false);
-    navigate("/login");
+    navigate("/login", { replace: true });
     onClose(); // Close the modal after logout
   };
 
@@ -71,7 +71,7 @@ export default function AppNavbar() {
     <>
       <Navbar className="shadow bg-slate-100/10 dark:bg-slate-900/80">
         <NavbarBrand>
-          <Link to="/" className="flex items-center">
+          <Link to="/" replace className="flex items-center">
             <LinkeeLogo />
             <p className="font-bold text-blue-500 text-3xl ms-2">LINKEE</p>
           </Link>
@@ -83,7 +83,7 @@ export default function AppNavbar() {
               <NavbarItem>
                 <Button
                   color="default"
-                  onPress={() => navigate("/login")}
+                  onPress={() => navigate("/login", { replace: true })}
                   variant="flat"
                 >
                   Login
@@ -92,7 +92,7 @@ export default function AppNavbar() {
               <NavbarItem>
                 <Button
                   color="primary"
-                  onPress={() => navigate("/register")}
+                  onPress={() => navigate("/register", { replace: true })}
                   variant="flat"
                 >
                   Sign Up
@@ -122,7 +122,7 @@ export default function AppNavbar() {
                 </DropdownItem>
                 <DropdownItem
                   key="settings"
-                  onPress={() => navigate("/profile")}
+                  onPress={() => navigate("/profile", { replace: true })}
                 >
                   My Profile
                 </DropdownItem>

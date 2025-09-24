@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Divider, Image } from "@heroui/react";
-
 import { useTimeAgo } from "../hooks/useTimeAgo";
 
 export default function Comment({ comments, commentsLimit = 1 }) {

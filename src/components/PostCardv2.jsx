@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Image } from "@heroui/react";
 import { useTimeAgo } from "../hooks/useTimeAgo";
@@ -65,7 +65,11 @@ export default function PostCardV2({ post }) {
             </svg>
           </span>
         </div>
-        <Link to={`/post-details/${post?.id}`} className="cursor-pointer">
+        <Link
+          to={`/post-details/${post?.id}`}
+          replace
+          className="cursor-pointer"
+        >
           <i className="fa-regular fa-comment"></i>
           {`${post?.comments?.length || 0} Comment${
             post?.comments?.length > 1 ? "s" : ""
@@ -113,6 +117,7 @@ export default function PostCardV2({ post }) {
           <div className="w-full">
             <Link
               to={`/post-details/${post?.id}`}
+              replace
               className="py-3 px-4 w-full block bg-slate-100 dark:bg-slate-700 text-center rounded-lg font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition ease-in-out delay-75"
             >
               Show more comments

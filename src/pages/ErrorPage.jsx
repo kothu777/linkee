@@ -1,4 +1,4 @@
-import React from "react";
+import { Button } from "@heroui/react";
 
 export default function ErrorPage({ error }) {
   return (
@@ -25,8 +25,8 @@ export default function ErrorPage({ error }) {
           </h3>
           <p className="mb-4">{error}</p>
           <div className="space-y-3">
-            <button
-              onClick={() => window.location.reload()}
+            <Button
+              onPress={() => window.location.reload()}
               className="w-full px-6 py-3 font-medium text-white bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
             >
               <span className="flex items-center justify-center gap-2">
@@ -45,7 +45,7 @@ export default function ErrorPage({ error }) {
                 </svg>
                 Try Again
               </span>
-            </button>
+            </Button>
           </div>
         </div>
       </div>

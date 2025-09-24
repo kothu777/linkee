@@ -49,7 +49,7 @@ export default function LoginPage() {
 
       // Redirect to home page after showing toast
       setTimeout(() => {
-        navigate("/");
+        navigate("/", { replace: true });
       }, 1000);
     } catch (error) {
       console.error("Login failed:", error);
@@ -152,6 +152,7 @@ export default function LoginPage() {
             Don't have an account?{" "}
             <Link
               to={"/register"}
+              replace
               className="text-blue-600 hover:text-blue-700 cursor-pointer font-medium"
             >
               Create an account
