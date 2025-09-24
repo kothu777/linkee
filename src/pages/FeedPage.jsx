@@ -14,35 +14,35 @@ export default function FeedPage() {
   const POSTS_PER_PAGE = 10;
 
   // Initial posts fetch
-  useEffect(() => {
-    const fetchInitialPosts = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  const fetchInitialPosts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        const response = await getAllPostsAPI(1, POSTS_PER_PAGE);
-        // Handle different response structures
-        const postsData = response?.posts;
-        const totalPosts = response?.paginationInfo?.total;
+      const response = await getAllPostsAPI(1, POSTS_PER_PAGE);
+      // Handle different response structures
+      const postsData = response?.posts;
+      const totalPosts = response?.paginationInfo?.total;
 
-        setPosts(postsData);
-        setCurrentPage(1);
+      setPosts(postsData);
+      setCurrentPage(1);
 
-        // Check if there are more posts to load
-        if (totalPosts) {
-          setHasNextPage(postsData.length < totalPosts);
-        } else {
-          // If no total count, assume there might be more if we got a full page
-          setHasNextPage(postsData.length === POSTS_PER_PAGE);
-        }
-      } catch (err) {
-        console.error("Error fetching initial posts:", err);
-        setError("Failed to load posts. Please try again.");
-      } finally {
-        setLoading(false);
+      // Check if there are more posts to load
+      if (totalPosts) {
+        setHasNextPage(postsData.length < totalPosts);
+      } else {
+        // If no total count, assume there might be more if we got a full page
+        setHasNextPage(postsData.length === POSTS_PER_PAGE);
       }
-    };
+    } catch (err) {
+      console.error("Error fetching initial posts:", err);
+      setError("Failed to load posts. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchInitialPosts();
   }, []);
 

@@ -5,7 +5,8 @@ import SpinnerComponent from "../components/SpinnerComponent";
 import ErrorPage from "./ErrorPage";
 import { Button, Image } from "@heroui/react";
 import { useTimeAgo } from "../hooks/useTimeAgo";
-import Comment from "../components/Comment";
+import Comment from "../components/Comments";
+import AddCommentField from "../components/AddCommentField";
 
 export default function PostDetailsPage() {
   const { id } = useParams();
@@ -40,7 +41,7 @@ export default function PostDetailsPage() {
     try {
       setLoading(true);
       setErrorMessage(null);
-      setCommentsLimit((prev) => prev + 5);
+      setCommentsLimit((prev) => prev * 2);
     } catch (error) {
       console.error("Error showing more comments:", error);
       setErrorMessage(error?.response?.data?.error);
@@ -91,7 +92,8 @@ export default function PostDetailsPage() {
               </div>
             )}
           </div>
-          <section className="flex items-center justify-between">
+          <section className="flex items-center justify-between ">
+            {/* Love icon */}
             <div
               className=" cursor-pointer w-fit "
               onClick={() => {
@@ -100,7 +102,7 @@ export default function PostDetailsPage() {
                 setTimeout(() => setIsPinging(false), 700);
               }}
             >
-              <span className="mr-2">
+              <span className="mr-2 flex items-center">
                 <svg
                   className={`${
                     isLiked
@@ -114,6 +116,7 @@ export default function PostDetailsPage() {
                 </svg>
               </span>
             </div>
+            {/* Number of comments */}
             <div className="cursor-pointer">
               <i className="fa-regular fa-comment"></i>
               {`${post?.comments?.length || 0} Comment${
@@ -121,79 +124,57 @@ export default function PostDetailsPage() {
               }`}
             </div>
           </section>
-
-          <div className="relative">
-            <input
-              className="pt-2 pb-2 pl-3 w-full h-11 bg-slate-100 dark:bg-slate-600 rounded-lg placeholder:text-slate-600 dark:placeholder:text-slate-300 font-medium pr-20"
-              type="text"
-              placeholder="Write a comment"
-            />
-            <span className="flex absolute right-3 top-2/4 -mt-3 items-center">
-              <svg
-                className="mr-2"
-                style={{ width: 26, height: 26 }}
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fill="currentColor"
-                  d="M20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12M22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12M10,9.5C10,10.3 9.3,11 8.5,11C7.7,11 7,10.3 7,9.5C7,8.7 7.7,8 8.5,8C9.3,8 10,8.7 10,9.5M17,9.5C17,10.3 16.3,11 15.5,11C14.7,11 14,10.3 14,9.5C14,8.7 14.7,8 15.5,8C16.3,8 17,8.7 17,9.5M12,17.23C10.25,17.23 8.71,16.5 7.81,15.42L9.23,14C9.68,14.72 10.75,15.23 12,15.23C13.25,15.23 14.32,14.72 14.77,14L16.19,15.42C15.29,16.5 13.75,17.23 12,17.23Z"
-                ></path>
-              </svg>
-              <svg
-                className="fill-blue-500 dark:fill-slate-50"
-                style={{ width: 24, height: 24 }}
-                viewBox="0 0 24 24"
-              >
-                <path d="M2,21L23,12L2,3V10L17,12L2,14V21Z" />
-              </svg>
-            </span>
-          </div>
-          {/* Comments content */}
-          {post.comments.length > 0 ? (
-            <div className="pt-6">
-              {/* Comment row */}
-              <Comment
-                comments={post?.comments}
-                commentsLimit={commentsLimit}
-              />
-              {/* End comments row */}
-              {post.comments.length > commentsLimit && (
-                <div className="flex justify-center">
-                  <Button
-                    onPress={() => {
-                      handleShowMoreComments();
-                    }}
-                  >
-                    Show More Comments
-                  </Button>
-                </div>
-             ) }
-            </div>
-          ) : (
-            <div className="pt-6">
-              <div className="text-center py-8">
-                <svg
-                  className="mx-auto h-12 w-12 text-slate-400 dark:text-slate-500 mb-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"
-                  />
-                </svg>
-                <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 mb-2">
-                  No comments yet
-                </h3>
-                <p className="text-slate-500 dark:text-slate-400">
-                  Be the first to share your thoughts on this post!
-                </p>
+          {/* ================= Comment section  =================*/}
+          <div className="pt-4 flex flex-col gap-4">
+            <AddCommentField postId={post?._id} />
+            {/* Comments content */}
+            {post.comments.length > 0 ? (
+              <div className="pt-4 flex flex-col gap-4">
+                {/* Comment row */}
+                <Comment
+                  comments={post?.comments}
+                  commentsLimit={commentsLimit}
+                />
+                {/* End comments row */}
+                {post.comments.length > commentsLimit && (
+                  <div className="flex justify-center">
+                    <Button
+                      onPress={() => {
+                        handleShowMoreComments();
+                      }}
+                    >
+                      Show More Comments
+                    </Button>
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+            ) : (
+              // !=========== No comments yet ===========
+              <div className="pt-6">
+                <div className="text-center py-8">
+                  <svg
+                    className="mx-auto h-12 w-12 text-slate-400 dark:text-slate-500 mb-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={1.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"
+                    />
+                  </svg>
+                  <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 mb-2">
+                    No comments yet
+                  </h3>
+                  <p className="text-slate-500 dark:text-slate-400">
+                    Be the first to share your thoughts on this post!
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
           {/* End Comments content */}
         </article>
       )}
