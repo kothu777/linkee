@@ -2,7 +2,7 @@ import {Button, Card, Skeleton} from "@heroui/react";
 
 export default function SkeletonCard() {
   return (
-    <Card className="w-[400px] h-[300px] mb-4 space-y-5 p-4" radius="lg">
+    <Card className="w-[380px] h-[290px] mb-4 space-y-5 p-4" radius="lg">
       <Skeleton className="rounded-lg">
         <div className="h-24 rounded-lg bg-default-300" />
       </Skeleton>

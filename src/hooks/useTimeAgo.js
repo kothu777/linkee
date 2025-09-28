@@ -3,14 +3,21 @@ import { useCallback } from 'react';
 
 export const useTimeAgo = () => {
   const formatTimeAgo = useCallback((createdAt) => {
-    if (!createdAt) return '';
+    if (!createdAt) return 'just now'; // Return 'just now' instead of empty string
     
     const date = new Date(createdAt);
     const now = Date.now();
     const timeDiff = now - date.getTime();
     
-    // Handle invalid dates
-    if (isNaN(timeDiff) || timeDiff < 0) return 'Invalid date';
+    // Handle invalid dates - return 'just now' for new comments
+    if (isNaN(date.getTime()) || isNaN(timeDiff)) {
+      return 'just now';
+    }
+    
+    // Handle future dates (can happen with new comments due to timing)
+    if (timeDiff < 0) {
+      return 'just now';
+    }
     
     const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
     const hours = Math.floor(timeDiff / (1000 * 60 * 60));

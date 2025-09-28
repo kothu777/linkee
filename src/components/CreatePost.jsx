@@ -1,63 +1,152 @@
-import { Button } from "@heroui/react";
+import { Button, Image } from "@heroui/react";
 import { useState } from "react";
 import { Textarea } from "@heroui/input";
 import { addPost } from "../Services/PostsService";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+// import imageImage from "../assets/testImage.jpg";
+// *=========== Create Post Component ===========
 export default function CreatePost() {
   const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [textAreaBody, setTextAreaBody] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [imgPreview, setImgPreview] = useState("");
+  const [imgFile, setImgFile] = useState(null);
+  // !============= Image Upload Handler ==============
+  function handleImageUpload(e) {
+    if (e.target?.files[0]) {
+      setImgPreview(URL.createObjectURL(e.target.files[0]));
+      setImgFile(e.target.files[0]);
+    }
+  }
+  // !================= Remove Uploaded Image =================
+  function removeUploadedImg() {
+    setImgPreview("");
+    setImgFile(null);
+    document.getElementById("fileInput").value = null;
+  }
+  //  !================= Create Post Handler =================
   const handleCreatePost = async () => {
-    setIsLoading(true);
-    const res = await addPost(textAreaBody);
-    console.log(res);
-    setTextAreaBody("");
-    setShowForm(false);
-    setIsLoading(false);
-    toast.success("Post created successfully");
-    setTimeout(() => {
-      navigate("/");
-    }, 1500);
+    try {
+      setIsLoading(true);
+      if (textAreaBody.trim().length !== 0 || imgFile) {
+        await addPost({ textAreaBody, imgFile });
+        setTextAreaBody("");
+        setShowForm(false);
+        toast.success("Post created successfully", {
+          position: "top-right",
+          autoClose: 1500,
+          hideProgressBar: false,
+        });
+        setTimeout(() => {
+          navigate(0, { replace: true });
+        }, 1500);
+      } else {
+        toast.error("Post body cannot be empty");
+      }
+    } catch (error) {
+      console.error("Error creating post:", error);
+      toast.error("Failed to create post. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
   return (
-    <div className="py-4 mb-4  -mt-5 bg-gray-50 shadow-lg rounded-lg px-7">
+    <div className="py-4 mb-4 mx-auto w-full max-w-xl -mt-5 bg-gray-50 shadow-lg rounded-lg px-7">
       {showForm ? (
-        <form  className=" w-full flex flex-col gap-2"
-        onSubmit={(e)=>{e.preventDefault(); handleCreatePost()}}>
-          
-            <Textarea
-              radius="lg"
-              value={textAreaBody}
-              onChange={(e) => setTextAreaBody(e.target.value)}
-              rows={15}
-              maxLength={5000}
-              errorMessage="The post body should be less than 5000 characters long."
-              label="Post Body"
-              placeholder="Enter your post body here"
-              variant="bordered"
-              
-            />
-            <small className={`${
-            textAreaBody.length == 5000 ? "text-red-500" : 
-            textAreaBody.length > 4000 ? "text-yellow-500" : 
-            "text-gray-400"
-          } -mt-2`}>{textAreaBody.length}/5000</small>
-          
-          <div className="flex items-center w-fit ms-auto gap-4 mt-auto">
-          <Button
-          variant="ghost"
-          color="danger"
-            onPress={() => {
-              setShowForm(false);
-            }}
+        <form
+          className=" w-full flex flex-col gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleCreatePost();
+          }}
+        >
+          <Textarea
+            autoFocus
+            value={textAreaBody}
+            onChange={(e) => setTextAreaBody(e.target.value)}
+            rows={15}
+            maxLength={5000}
+            errorMessage="The post body should be less than 5000 characters long."
+            label="Post Body"
+            placeholder="Enter your post body here"
+            variant="faded"
+            isClearable
+            onClear={() => setTextAreaBody("")}
+          />
+          <small
+            className={`${
+              textAreaBody.length == 5000
+                ? "text-red-500"
+                : textAreaBody.length > 4000
+                ? "text-yellow-500"
+                : "text-gray-400"
+            } -mt-2`}
           >
-            Cancel
-          </Button>
-          <Button color="primary" type="submit" variant="shadow" isLoading={isLoading}>
-          Post
-        </Button>
+            {textAreaBody.length}/5000
+          </small>
+          <div className="relative w-fit mx-auto">
+            {imgFile && (
+              <>
+                <Button
+                  color="danger"
+                  size="sm"
+                  radius="full"
+                  className="absolute -top-0.5 -right-0.5 z-10"
+                  isIconOnly
+                  aria-label="Remove Image"
+                  rounded
+                  onPress={removeUploadedImg}
+                >
+                  <i className="fa-solid fa-xmark"></i>
+                </Button>
+                <Image
+                  src={imgPreview}
+                  alt="Image Preview"
+                  className="w-fit mx-auto object-cover z-0"
+                ></Image>{" "}
+              </>
+            )}
+          </div>
+          <div className="flex items-center">
+            <div className="flex items-center space-x-3">
+              {/* Image Upload Button */}
+              <label className="cursor-pointer text-gray-600 hover:text-blue-600 transition duration-200">
+                <input
+                  // onChange={handleFileChange}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                  id="fileInput"
+                />
+                <div className="flex items-center">
+                  <i className="fa-regular dark:fa-solid fa-image fa-lg"></i>
+                  <span className="text-sm font-medium">Photo</span>
+                </div>
+              </label>
+            </div>
+
+            <div className="flex items-center w-fit ms-auto gap-4 mt-auto">
+              <Button
+                variant="ghost"
+                color="danger"
+                onPress={() => {
+                  setShowForm(false);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                color="primary"
+                type="submit"
+                variant="shadow"
+                isLoading={isLoading}
+              >
+                Post
+              </Button>
+            </div>
           </div>
         </form>
       ) : (

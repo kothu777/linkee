@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Image } from "@heroui/react";
 import { useTimeAgo } from "../hooks/useTimeAgo";
 import Comment from "./Comments";
@@ -8,9 +8,21 @@ import AddCommentField from "./AddCommentField";
 export default function PostCardV2({ post }) {
   const [isLiked, setIsLiked] = useState(false);
   const [isPinging, setIsPinging] = useState(false);
+  const [showReadMore, setShowReadMore] = useState(false);
+  const textRef = useRef(null);
   const formatTimeAgo = useTimeAgo();
+  const navigate = useNavigate();
+
+  // Check if text is actually clamped by comparing scrollHeight with clientHeight
+  useEffect(() => {
+    if (textRef.current) {
+      const element = textRef.current;
+      const isTextClamped = element.scrollHeight > element.clientHeight;
+      setShowReadMore(isTextClamped);
+    }
+  }, [post?.body]);
   return (
-    <article className="mb-4 break-inside p-6 max-w-xl shadow-xl rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex flex-col bg-clip-border">
+    <article className="mb-4 break-inside w-full mx-auto p-5 max-w-xl shadow-xl rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex flex-col bg-clip-border">
       <div className="flex pb-6 items-center justify-between">
         <div className="flex gap-2">
           <Image
@@ -31,7 +43,24 @@ export default function PostCardV2({ post }) {
           </div>
         </div>
       </div>
-      <p className="dark:text-slate-200 break-words">{post?.body}</p>
+      <div>
+        <p
+          ref={textRef}
+          className="dark:text-slate-200 break-words text-wrap line-clamp-3"
+        >
+          {post?.body}
+        </p>
+        {showReadMore && (
+          <button
+            onClick={() =>
+              navigate(`/post-details/${post?.id}`, { replace: true })
+            }
+            className="mt-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm transition-colors duration-200 flex items-center gap-1"
+          >
+            Read more <i className="fa-solid fa-arrow-right mt-0.5"></i>
+          </button>
+        )}
+      </div>
       <div className="py-4">
         {post?.image && (
           <div className=" flex justify-center mb-1 w-full">
@@ -80,7 +109,7 @@ export default function PostCardV2({ post }) {
 
       {/* Comments content */}
       <div className="pt-4 flex flex-col gap-4">
-        <AddCommentField postId={post?._id}/>
+        <AddCommentField postId={post?._id} />
         {/* Comments section */}
         {post.comments.length > 0 && (
           <div className="pt-6 flex flex-col">

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { getAllPostsAPI } from "../Services/PostsService";
 import PostCardV2 from "../components/PostCardv2";
 import SkeletonCard from "../components/SkeletonCard";
@@ -9,49 +9,39 @@ export default function FeedPage() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(null); // Will be set to last page
+  const [currentPage, setCurrentPage] = useState(null); 
   const [hasNextPage, setHasNextPage] = useState(true);
   const loadMoreRef = useRef(null);
-  const POSTS_PER_PAGE = 10;
+  const POSTS_PER_PAGE = 20;
 
-  // Initial posts fetch - start from the last page to get newest posts
+  // !=============Memoize skeleton cards to prevent unnecessary re-renders=============
+  const skeletonCards = useMemo(() => 
+    [...Array(5)].map((_, index) => (
+      <SkeletonCard key={`skeleton-${index}`} />
+    )), []
+  );
+
+  // !=============Initial posts fetch - start from page 1 and go forward=============
   const fetchInitialPosts = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // First, get page 1 to determine total pages
-      const initialResponse = await getAllPostsAPI(1, POSTS_PER_PAGE);
-      const paginationInfo = initialResponse?.paginationInfo;
+      // !============= call the API to get the posts =============
+      const response = await getAllPostsAPI(1, POSTS_PER_PAGE);
+      const postsData = response?.posts;
+      const paginationInfo = response?.paginationInfo;
 
-      if (!paginationInfo?.numberOfPages) {
-        throw new Error("Unable to get pagination info");
+      if (!postsData) {
+        throw new Error("No posts data received");
       }
 
-      const lastPage = paginationInfo.numberOfPages;
-      // Note: We only need lastPage for initial setup, not storing totalPages
+      // !=============Set posts without any additional sorting - trust API order=============
+      setPosts(postsData);
+      setCurrentPage(1);
 
-      // Now fetch the last page (newest posts)
-      const response = await getAllPostsAPI(lastPage, POSTS_PER_PAGE);
-      const postsData = response?.posts;
-
-      // Sort posts by createdAt date (newest first) and sort comments within each post
-      const sortedPosts =
-        postsData
-          ?.map((post) => ({
-            ...post,
-            comments:
-              post.comments?.sort(
-                (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-              ) || [],
-          }))
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) || [];
-
-      setPosts(sortedPosts);
-      setCurrentPage(lastPage);
-
-      // Check if there are more posts to load (going backwards)
-      setHasNextPage(lastPage > 1);
+      // !============= Check if there are more pages to load (going forward) =============
+      setHasNextPage(paginationInfo?.nextPage ? true : false);
     } catch (err) {
       console.error("Error fetching initial posts:", err);
       setError("Failed to load posts. Please try again.");
@@ -64,59 +54,39 @@ export default function FeedPage() {
     fetchInitialPosts();
   }, []);
 
-  // Load more posts function - goes backwards through pages
+  // !=============Load more posts function - goes forward through pages=============
   const loadMorePosts = useCallback(async () => {
     if (loadingMore || !hasNextPage || currentPage === null) return;
 
     try {
       setLoadingMore(true);
-      const previousPage = currentPage - 1; // Go backwards
+      const nextPage = currentPage + 1; 
 
-      if (previousPage < 1) {
-        setHasNextPage(false);
-        return;
-      }
-
-      const response = await getAllPostsAPI(previousPage, POSTS_PER_PAGE);
+      const response = await getAllPostsAPI(nextPage, POSTS_PER_PAGE);
       const newPosts = response?.posts;
+      const paginationInfo = response?.paginationInfo;
 
       if (newPosts && newPosts.length > 0) {
-        // Sort new posts by createdAt date (newest first) and sort comments within each post
-        const sortedNewPosts = newPosts
-          .map((post) => ({
-            ...post,
-            comments:
-              post.comments?.sort(
-                (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-              ) || [],
-          }))
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        // !============= Add new posts without any sorting - trust API order =============
+        setPosts((prevPosts) => [...prevPosts, ...newPosts]);
 
-        setPosts((prevPosts) => {
-          // Add older posts at the end, maintain chronological order
-          const allPosts = [...prevPosts, ...sortedNewPosts];
-          return allPosts.sort(
-            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-          );
-        });
+        setCurrentPage(nextPage);
 
-        setCurrentPage(previousPage);
-
-        // Check if there are more pages to load (going backwards)
-        setHasNextPage(previousPage > 1);
+        // !============= Check if there are more pages to load (going forward) =============
+        setHasNextPage(paginationInfo?.nextPage ? true : false);
       } else {
-        // No more posts available
+        // !============= No more posts available =============
         setHasNextPage(false);
       }
     } catch (err) {
       console.error("Error loading more posts:", err);
-      // Don't show error for load more, just log it
+      // !============= Don't show error for load more, just log it =============
     } finally {
       setLoadingMore(false);
     }
   }, [currentPage, loadingMore, hasNextPage]);
 
-  // IntersectionObserver for infinite scroll
+  // !=============IntersectionObserver for infinite scroll=============
   useEffect(() => {
     if (!loadMoreRef.current || loading || !hasNextPage) return;
 
@@ -139,28 +109,27 @@ export default function FeedPage() {
     return () => observer.disconnect();
   }, [loadMorePosts, loading, loadingMore, hasNextPage]);
 
-  // Retry function for errors
+  // !=============Retry function for errors=============
   const handleRetry = () => {
-    window.location.reload();
+    setError(null);
+    fetchInitialPosts();
   };
 
-  // Initial loading state
+  // !=============Initial loading state=============
   if (loading) {
     return (
-      <div className="grid gap-3 mx-auto min-h-screen items-start justify-center p-3 pt-8">
+      <div className="flex flex-col gap-3 mx-auto min-h-screen items-center p-3 pt-8 w-full max-w-2xl">
         <div className="flex items-center flex-col justify-center gap-3">
-          {[...Array(5)].map((_, index) => (
-            <SkeletonCard key={`skeleton-${index}`} />
-          ))}
+          {skeletonCards}
         </div>
       </div>
     );
   }
 
-  // Error state
+  // !=============Error state=============
   if (error) {
     return (
-      <div className="grid gap-3 mx-auto min-h-screen items-center justify-center p-3">
+      <div className="flex flex-col gap-3 mx-auto min-h-screen items-center justify-center p-3 w-full max-w-2xl">
         <div className="text-center text-red-500">
           <div className="mb-4">
             <svg
@@ -178,10 +147,11 @@ export default function FeedPage() {
             </svg>
           </div>
           <h3 className="text-lg font-medium mb-2">Something went wrong</h3>
-          <p className="mb-4">{error}</p>
+          <p className="mb-4" role="alert">{error}</p>
           <button
             onClick={handleRetry}
-            className="px-6 py-3 font-medium bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            className="px-6 py-3 font-medium bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            aria-label="Retry loading posts"
           >
             Try Again
           </button>
@@ -190,10 +160,10 @@ export default function FeedPage() {
     );
   }
 
-  // Empty state
+  // !=============Empty state=============
   if (posts.length === 0) {
     return (
-      <div className="grid gap-3 mx-auto min-h-screen items-center justify-center p-3">
+      <div className="flex flex-col gap-3 mx-auto min-h-screen items-center justify-center p-3 w-full max-w-2xl">
         <div className="text-center text-gray-500">
           <div className="mb-4">
             <svg
@@ -217,32 +187,34 @@ export default function FeedPage() {
     );
   }
 
-  // Posts display
+  // !=============Posts display=============
   return (
-    <div className="grid gap-3 mx-auto min-h-screen items-start justify-center p-3 pt-8">
-      {/* Create Post */}
+    <div className="flex flex-col gap-3 mx-auto min-h-screen items-center p-3 pt-8 w-full max-w-2xl">
+      {/* !============= Create Post ============= */}
       <CreatePost />
 
-      {/* Posts list */}
-      {posts.map((post, index) => (
-        <div key={`${post?.id}-${index}`}>
-          <PostCardV2 post={post} />
-        </div>
-      ))}
+      {/* !============= Posts list ============= */}
+      <main role="main" aria-label="Posts feed" className="w-full">
+        {posts.map((post, index) => (
+          <article key={`${post?.id}-${index}`} className="w-full">
+            <PostCardV2 post={post} />
+          </article>
+        ))}
+      </main>
 
-      {/* Loading more indicator */}
+      {/* !============= Loading more indicator ============= */}
       {loadingMore && (
         <div className="py-6 text-center">
-          <div className="flex items-center justify-center gap-3">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+          <div className="flex items-center justify-center gap-3" role="status" aria-live="polite">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500" aria-hidden="true"></div>
             <span className="text-slate-500 dark:text-slate-400">
-              Loading older posts...
+              Loading more posts...
             </span>
           </div>
         </div>
       )}
 
-      {/* Load more sentinel */}
+      {/* !============= Load more sentinel ============= */}
       {hasNextPage && !loadingMore && (
         <div
           ref={loadMoreRef}
@@ -250,12 +222,12 @@ export default function FeedPage() {
           style={{ minHeight: "50px" }}
         >
           <div className="flex items-center justify-center">
-            <span>Scroll for older posts...</span>
+            <span>Scroll for more posts...</span>
           </div>
         </div>
       )}
 
-      {/* End of posts indicator */}
+      {/* !============= End of posts indicator ============= */}
       {!hasNextPage && posts.length > 0 && (
         <div className="py-8 text-center text-slate-400 dark:text-slate-500">
           <div className="flex items-center justify-center gap-2">

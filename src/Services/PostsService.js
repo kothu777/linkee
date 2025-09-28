@@ -1,6 +1,6 @@
 import axios from "axios";
 // !========================= git all posts ===========================================
-export async function getAllPostsAPI(page = 1, limit = 10) {
+export async function getAllPostsAPI(page = 1, limit = 20) {
   try {
     const API = `${import.meta.env.VITE_BASE_URL}/posts`;
     const { data } = await axios.get(API, {
@@ -10,6 +10,7 @@ export async function getAllPostsAPI(page = 1, limit = 10) {
       params: {
         page,
         limit,
+        sort: "-createdAt"
       },
     });
     return data;
@@ -36,21 +37,21 @@ export async function getSinglePostsAPI(id) {
 }
 
 // !========================= create post ===========================================
-export async function addPost(postBody, postImage) {
+export async function addPost(data) {
   try {
+    const formData = new FormData();
+    if (data.textAreaBody) {
+      formData.append("body", data.textAreaBody);
+    }
+    if (data.imgFile) {
+      formData.append("image", data.imgFile);
+    }
     const API = `${import.meta.env.VITE_BASE_URL}/posts`;
-    const res = await axios.post(
-      API,
-      {
-        body: postBody,
-        image: postImage,
+    const res = await axios.post(API, formData, {
+      headers: {
+        token: localStorage.getItem("token"),
       },
-      {
-        headers: {
-          token: localStorage.getItem("token"),
-        },
-      }
-    );
+    });
 
     return res;
   } catch (error) {

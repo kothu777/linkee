@@ -22,7 +22,7 @@ export default function SingleComments({ comment }) {
               {comment?.commentCreator?.name}
             </h1>
             <small className="text-slate-500 text-xs dark:text-slate-300">
-              {formatTimeAgo(comment?.createdAt)}
+              {formatTimeAgo(comment?.createdAt || new Date().toISOString())}
             </small>
           </div>
           <p>{comment?.content}</p>
