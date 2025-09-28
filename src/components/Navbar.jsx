@@ -20,6 +20,7 @@ import { useContext, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { AuthContext } from "../contexts/authContext";
+import { UserDataContext } from "@/contexts/userDataContext";
 
 export const LinkeeLogo = () => {
   return <img src={logo} alt="logo" className="w-9 h-9" />;
@@ -28,6 +29,7 @@ export const LinkeeLogo = () => {
 export default function AppNavbar() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
+  const { userData } = useContext(UserDataContext);
   const navigate = useNavigate();
 
   // Safe localStorage operations
@@ -64,8 +66,8 @@ export default function AppNavbar() {
   }, [isLoggedIn, setIsLoggedIn]);
 
   // Get user email from context or fallback
-  const userEmail = "user@linkee.com";
-  const userName = "User";
+  const userEmail = userData?.name || "Guest";
+  const userName = userData?.email || "guest@example.com";
 
   return (
     <>
@@ -109,13 +111,14 @@ export default function AppNavbar() {
                   color="primary"
                   name={userName}
                   size="md"
-                  src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
+                  src={userData?.photo || ""}
                 />
               </DropdownTrigger>
               <DropdownMenu aria-label="Profile Actions" variant="flat">
                 <DropdownItem
                   key="profile"
                   className="h-14 gap-2 mb-1 bg-blue-50"
+                  value={`Signed in as ${userEmail}`}
                 >
                   <p className="font-semibold text-gray-600">Signed in as</p>
                   <p className="font-bold text-blue-600">{userEmail}</p>

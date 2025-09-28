@@ -10,7 +10,7 @@ export async function getAllPostsAPI(page = 1, limit = 20) {
       params: {
         page,
         limit,
-        sort: "-createdAt"
+        sort: "-createdAt",
       },
     });
     return data;
@@ -56,6 +56,22 @@ export async function addPost(data) {
     return res;
   } catch (error) {
     console.error("Error in Creating the post:", error);
+    return error;
+  }
+}
+
+// !========================= Delete a post ===========================================
+export async function deletePostsAPI(id) {
+  try {
+    const API = `${import.meta.env.VITE_BASE_URL}/posts/${id}`;
+    const { data } = await axios.delete(API, {
+      headers: {
+        token: localStorage.getItem("token"),
+      },
+    });
+    return data;
+  } catch (error) {
+    console.log(error);
     return error;
   }
 }

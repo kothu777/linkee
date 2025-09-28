@@ -9,25 +9,27 @@ export default function FeedPage() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(null); 
+  const [currentPage, setCurrentPage] = useState(null);
   const [hasNextPage, setHasNextPage] = useState(true);
   const loadMoreRef = useRef(null);
   const POSTS_PER_PAGE = 20;
 
   // !=============Memoize skeleton cards to prevent unnecessary re-renders=============
-  const skeletonCards = useMemo(() => 
-    [...Array(5)].map((_, index) => (
-      <SkeletonCard key={`skeleton-${index}`} />
-    )), []
+  const skeletonCards = useMemo(
+    () =>
+      [...Array(5)].map((_, index) => (
+        <SkeletonCard key={`skeleton-${index}`} />
+      )),
+    []
   );
 
   // !=============Initial posts fetch - start from page 1 and go forward=============
-  const fetchInitialPosts = async () => {
+  const fetchAllPosts = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // !============= call the API to get the posts =============
+      // todo:------ call the API to get the posts ------
       const response = await getAllPostsAPI(1, POSTS_PER_PAGE);
       const postsData = response?.posts;
       const paginationInfo = response?.paginationInfo;
@@ -36,11 +38,11 @@ export default function FeedPage() {
         throw new Error("No posts data received");
       }
 
-      // !=============Set posts without any additional sorting - trust API order=============
+      // todo:------ Set posts ------
       setPosts(postsData);
       setCurrentPage(1);
 
-      // !============= Check if there are more pages to load (going forward) =============
+      // todo:------ Check if there are more pages to load (going forward) ------
       setHasNextPage(paginationInfo?.nextPage ? true : false);
     } catch (err) {
       console.error("Error fetching initial posts:", err);
@@ -51,16 +53,15 @@ export default function FeedPage() {
   };
 
   useEffect(() => {
-    fetchInitialPosts();
+    fetchAllPosts();
   }, []);
-
   // !=============Load more posts function - goes forward through pages=============
   const loadMorePosts = useCallback(async () => {
     if (loadingMore || !hasNextPage || currentPage === null) return;
 
     try {
       setLoadingMore(true);
-      const nextPage = currentPage + 1; 
+      const nextPage = currentPage + 1;
 
       const response = await getAllPostsAPI(nextPage, POSTS_PER_PAGE);
       const newPosts = response?.posts;
@@ -112,7 +113,7 @@ export default function FeedPage() {
   // !=============Retry function for errors=============
   const handleRetry = () => {
     setError(null);
-    fetchInitialPosts();
+    fetchAllPosts();
   };
 
   // !=============Initial loading state=============
@@ -147,7 +148,9 @@ export default function FeedPage() {
             </svg>
           </div>
           <h3 className="text-lg font-medium mb-2">Something went wrong</h3>
-          <p className="mb-4" role="alert">{error}</p>
+          <p className="mb-4" role="alert">
+            {error}
+          </p>
           <button
             onClick={handleRetry}
             className="px-6 py-3 font-medium bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -191,13 +194,13 @@ export default function FeedPage() {
   return (
     <div className="flex flex-col gap-3 mx-auto min-h-screen items-center p-3 pt-8 w-full max-w-2xl">
       {/* !============= Create Post ============= */}
-      <CreatePost />
+      <CreatePost fetchAllPosts={fetchAllPosts} />
 
       {/* !============= Posts list ============= */}
       <main role="main" aria-label="Posts feed" className="w-full">
         {posts.map((post, index) => (
           <article key={`${post?.id}-${index}`} className="w-full">
-            <PostCardV2 post={post} />
+            <PostCardV2 post={post} fetchAllPosts={fetchAllPosts} />
           </article>
         ))}
       </main>
@@ -205,8 +208,15 @@ export default function FeedPage() {
       {/* !============= Loading more indicator ============= */}
       {loadingMore && (
         <div className="py-6 text-center">
-          <div className="flex items-center justify-center gap-3" role="status" aria-live="polite">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500" aria-hidden="true"></div>
+          <div
+            className="flex items-center justify-center gap-3"
+            role="status"
+            aria-live="polite"
+          >
+            <div
+              className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"
+              aria-hidden="true"
+            ></div>
             <span className="text-slate-500 dark:text-slate-400">
               Loading more posts...
             </span>

@@ -3,11 +3,11 @@ import { useState } from "react";
 import { Textarea } from "@heroui/input";
 import { addPost } from "../Services/PostsService";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
 // import imageImage from "../assets/testImage.jpg";
-// *=========== Create Post Component ===========
-export default function CreatePost() {
-  const navigate = useNavigate();
+// *===================================================*
+// *============== Create Post Component ==============*
+// *===================================================*
+  export default function CreatePost({ fetchAllPosts }) {
   const [showForm, setShowForm] = useState(false);
   const [textAreaBody, setTextAreaBody] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -31,7 +31,10 @@ export default function CreatePost() {
     try {
       setIsLoading(true);
       if (textAreaBody.trim().length !== 0 || imgFile) {
-        await addPost({ textAreaBody, imgFile });
+        const result = await addPost({ textAreaBody, imgFile });
+        if (result.success) {
+         fetchAllPosts();
+        }
         setTextAreaBody("");
         setShowForm(false);
         toast.success("Post created successfully", {
@@ -39,9 +42,7 @@ export default function CreatePost() {
           autoClose: 1500,
           hideProgressBar: false,
         });
-        setTimeout(() => {
-          navigate(0, { replace: true });
-        }, 1500);
+       fetchAllPosts();
       } else {
         toast.error("Post body cannot be empty");
       }
@@ -69,6 +70,11 @@ export default function CreatePost() {
             rows={15}
             maxLength={5000}
             errorMessage="The post body should be less than 5000 characters long."
+            classNames={{
+              inputWrapper:
+                "ring-0 focus:ring-0 focus:outline-none data-[focus=true]:ring-0 data-[focus-visible=true]:ring-0 group-data-[focus=true]:ring-0",
+              input: "focus:outline-none focus:ring-0",
+            }}
             label="Post Body"
             placeholder="Enter your post body here"
             variant="faded"
