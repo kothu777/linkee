@@ -8,7 +8,6 @@ import { ButtonGroup } from "@heroui/react";
 export default function DropDownComponent({
   handleUpdatePost,
   onOpen,
-  deletedComponent,
   type,
 }) {
   return (
@@ -21,14 +20,16 @@ export default function DropDownComponent({
       <DropdownMenu aria-label="Static Actions">
         <DropdownItem
           key="edit"
+          textValue={`Edit ${type}`}
           onPress={() => {
-            handleUpdatePost && handleUpdatePost(deletedComponent._id);
+            handleUpdatePost && handleUpdatePost();
           }}
         >
           Edit {type}
         </DropdownItem>
         <DropdownItem
           key="delete"
+          textValue={`Delete ${type}`}
           onPress={onOpen}
           className="text-danger"
           color="danger"

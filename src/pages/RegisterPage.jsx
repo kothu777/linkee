@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { scheme } from "../Schemas/registerSchema";
 import { signupUser } from "../Services/authServices";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Link, useNavigate } from "react-router-dom";
 // todo:============== Start of the RegisterPage component ==============
@@ -77,7 +77,6 @@ export default function RegisterPage() {
   };
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <ToastContainer />
       <div className="max-w-xl w-full bg-white/80 backdrop-blur-sm py-8 px-8 shadow-2xl rounded-2xl border border-white/50">
         {/* Header */}
         <div className="text-center mb-8">

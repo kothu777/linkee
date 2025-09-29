@@ -2,6 +2,10 @@
 
 A modern social media application built with React, featuring a clean and responsive design with real-time interactions.
 
+## 🔗 Live Demo
+
+- Production: [SocialApp on GitHub Pages](https://abdelfattahelnaggar.github.io/linkee/)
+
 ## ✨ Features
 
 - 🔐 **Authentication System** - User login and registration with form validation
@@ -141,9 +145,63 @@ The project is configured with:
 
 The application integrates with a backend API:
 - **Base URL**: `https://linked-posts.routemisr.com`
-- **Authentication**: User registration via `/users/signup` endpoint
+- **Authentication**: User registration via `/users/signup` and sign-in via `/users/signin`
+- **Posts**: Create, update, delete, and fetch posts
+- **Comments**: Create, update, and delete comments
 - **Error Handling**: Comprehensive error handling with user-friendly messages
 - **Loading States**: Visual feedback during API calls
+
+## 🆕 Recent Updates
+
+- **Auth state sync (no reload after login):**
+  - Login now updates both `AuthContext` and `UserDataContext` immediately (`setIsLoggedIn`, `setToken`).
+  - `UserDataContext` fetches the logged user whenever the token changes and clears state on 401.
+  - Token changes from other tabs are synced via the `storage` event.
+
+- **Toast notifications:**
+  - There must be exactly one `ToastContainer` in `src/main.jsx`.
+  - All pages/components should only import and use `toast` (no extra containers).
+
+- **Accessibility improvements:**
+  - Use `textValue` only on HeroUI `DropdownItem` when contents are non-plain text.
+  - Do not pass `textValue` to DOM elements like `p`, `button`, or `ModalHeader`.
+
+- **Update Post modal UX:**
+  - Textarea pre-fills with original content on open.
+  - Modal is scrollable, constrained to viewport height, and tall images are capped.
+  - Image removal is currently not supported by the backend; users can replace the image instead. The UI warns users accordingly.
+
+- **Reusable modals and dropdown:**
+  - `DeleteModalComponent` and `UpdateModalComponent` are generic and reused across posts and details pages.
+  - `DropDownComponent` wires edit/delete actions. Ensure you pass `handleUpdatePost` for edit and `onOpen` for delete.
+
+- **Comments handling:**
+  - Temporary client-side guard for deletion: users can delete their own comments on their own posts. Attempts outside this rule show a clear error.
+  - Inline editing uses the existing input field with character counter and Enter-to-save support.
+
+## ⚙️ Environment Variables
+
+Create a `.env` (or `.local.env`) file in the project root with:
+
+```bash
+VITE_BASE_URL=https://linked-posts.routemisr.com
+```
+
+Restart the dev server after changing environment variables.
+
+## 🐞 Troubleshooting
+
+- **Toasts not showing:**
+  - Ensure there is only one `ToastContainer` (in `src/main.jsx`).
+  - Components should import `{ toast }` from `react-toastify` and call `toast.success/error/...` directly.
+
+- **Ellipsis button missing after login:**
+  - Ensure login sets both `setToken(res.token)` and `setIsLoggedIn(true)`.
+  - Ensure logout clears auth state: remove token from `localStorage` and call `setToken(null)`.
+
+## ⚠️ Known Limitations
+
+- The backend currently does not support removing a post image via the update endpoint. The UI provides a warning and encourages replacing the image instead.
 
 ## 🤝 Contributing
 

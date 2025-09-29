@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ButtonGroup, Image, useDisclosure } from "@heroui/react";
+import {  Image, useDisclosure } from "@heroui/react";
 import { useTimeAgo } from "../hooks/useTimeAgo";
 import Comment from "./Comments";
 import AddCommentField from "./AddCommentField";
@@ -8,10 +8,11 @@ import AddCommentField from "./AddCommentField";
 
 import { useContext } from "react";
 import { UserDataContext } from "../contexts/userDataContext.jsx";
-import { deletePostsAPI } from "@/Services/PostsService";
+import { deletePostsAPI, updatePost } from "@/Services/PostsService";
 import { toast } from "react-toastify";
 import DropDownComponent from "./DropDownComponent";
 import DeleteModalComponent from "./DeleteModalComponent";
+import UpdateModalComponent from "./UpdateModalComponent";
 // *=====================================================================*
 // *======================== Post Card Component ========================*
 // *=====================================================================*
@@ -20,12 +21,14 @@ export default function PostCardV2({ post, fetchAllPosts }) {
   const [isPinging, setIsPinging] = useState(false);
   const [showReadMore, setShowReadMore] = useState(false);
   const [isPostDeleting, setIsPostDeleting] = useState(false);
+  const [isPostUpdating, setIsPostUpdating] = useState(false);
   const textRef = useRef(null);
   const formatTimeAgo = useTimeAgo();
   const navigate = useNavigate();
   const { userData } = useContext(UserDataContext);
   const isPostByLoggedUser = userData?._id === post?.user?._id;
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onOpenChange: onDeleteOpenChange } = useDisclosure();
+  const { isOpen: isUpdateOpen, onOpen: onUpdateOpen, onOpenChange: onUpdateOpenChange } = useDisclosure();
 
   // !================ Check if text is actually clamped by comparing scrollHeight with clientHeight ================!
   useEffect(() => {
@@ -61,8 +64,35 @@ export default function PostCardV2({ post, fetchAllPosts }) {
     }
   };
   // !============= Handle Update post function =============
-  const handleUpdatePost = (postId) => {
-    console.log(`Update post with ID: ${postId}`);
+  const handleUpdatePost = () => {
+    // Open the update modal when edit is clicked
+    onUpdateOpen();
+  };
+
+  // !============= Handle Save Updated Post =============
+  const handleSaveUpdatedPost = async (updatedData, onClose) => {
+    try {
+      setIsPostUpdating(true);
+      const res = await updatePost(post._id, updatedData);
+      if (res?.data?.message === "success") {
+        await fetchAllPosts(); // Refresh posts feed
+        toast.success("Post updated successfully", {
+          position: "top-right",
+          autoClose: 1500,
+          hideProgressBar: false,
+        });
+        onClose();
+      }
+    } catch (err) {
+      console.error("Error updating post:", err);
+      toast.error("Failed to update post. Please try again.", {
+        position: "top-right",
+        autoClose: 1500,
+        hideProgressBar: false,
+      });
+    } finally {
+      setIsPostUpdating(false);
+    }
   };
   // ?===================================================!
   // ?================ Post Card JSX ====================!
@@ -90,7 +120,7 @@ export default function PostCardV2({ post, fetchAllPosts }) {
             </div>
           </div>
           {isPostByLoggedUser && (
-           <DropDownComponent handleUpdatePost={handleUpdatePost} onOpen={onOpen} deletedComponent={post} type={"post"}/>
+           <DropDownComponent handleUpdatePost={handleUpdatePost} onOpen={onDeleteOpen} deletedComponent={post} type={"post"}/>
           )}
         </div>
         <div>
@@ -186,8 +216,23 @@ export default function PostCardV2({ post, fetchAllPosts }) {
         </div>
         {/* End Comments content */}
       </article>
+      {/* Update Modal */}
+      <UpdateModalComponent
+        isOpen={isUpdateOpen}
+        onOpenChange={onUpdateOpenChange}
+        handleUpdate={handleSaveUpdatedPost}
+        updatedComponent={post}
+        isUpdating={isPostUpdating}
+      />
       {/* Delete Confirmation Modal */}
-      <DeleteModalComponent isOpen={isOpen} onOpenChange={onOpenChange} isDeleting={isPostDeleting} handleDelete={handleDeletePost} deletedComponent={post} type={"post"}/>
+      <DeleteModalComponent 
+        isOpen={isDeleteOpen} 
+        onOpenChange={onDeleteOpenChange} 
+        isDeleting={isPostDeleting} 
+        handleDelete={handleDeletePost} 
+        deletedComponent={post} 
+        type={"post"}
+      />
     </>
   );
 }

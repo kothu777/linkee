@@ -29,7 +29,7 @@ export const LinkeeLogo = () => {
 export default function AppNavbar() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
-  const { userData } = useContext(UserDataContext);
+  const { userData, setToken } = useContext(UserDataContext);
   const navigate = useNavigate();
 
   // Safe localStorage operations
@@ -53,6 +53,7 @@ export default function AppNavbar() {
   const handleLogout = () => {
     removeStoredToken();
     setIsLoggedIn(false);
+    setToken(null); // Clear user data from context
     navigate("/login", { replace: true });
     onClose(); // Close the modal after logout
   };
@@ -118,7 +119,7 @@ export default function AppNavbar() {
                 <DropdownItem
                   key="profile"
                   className="h-14 gap-2 mb-1 bg-blue-50"
-                  value={`Signed in as ${userEmail}`}
+                  textValue={`Signed in as ${userEmail}`}
                 >
                   <p className="font-semibold text-gray-600">Signed in as</p>
                   <p className="font-bold text-blue-600">{userEmail}</p>
@@ -126,16 +127,18 @@ export default function AppNavbar() {
                 <DropdownItem
                   key="settings"
                   onPress={() => navigate("/profile", { replace: true })}
+                  textValue="My Profile"
                 >
                   My Profile
                 </DropdownItem>
-                <DropdownItem key="help_and_feedback">
+                <DropdownItem key="help_and_feedback" textValue="Help & Feedback">
                   Help & Feedback
                 </DropdownItem>
                 <DropdownItem
                   key="logout"
                   className="border my-1 border-red-700 bg-red-500 text-white text-center hover:!bg-red-500/80 hover:!font-bold hover:!text-white transition-all duration-300"
                   onPress={onOpen}
+                  textValue="Log Out"
                 >
                   Log Out
                 </DropdownItem>
@@ -149,19 +152,19 @@ export default function AppNavbar() {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">
-                Confirm Logout
-              </ModalHeader>
-              <ModalBody>
-                <p>Are you sure you want to logout?</p>
-              </ModalBody>
-              <ModalFooter>
-                <Button color="success" variant="light" onPress={onClose}>
-                  Cancel
-                </Button>
-                <Button color="danger" onPress={handleLogout}>
-                  Logout
-                </Button>
+                <ModalHeader className="flex flex-col gap-1">
+                  Confirm Logout
+                </ModalHeader>
+                <ModalBody>
+                  <p>Are you sure you want to logout?</p>
+                </ModalBody>
+                <ModalFooter>
+                  <Button color="success" variant="light" onPress={onClose}>
+                    Cancel
+                  </Button>
+                  <Button color="danger" onPress={handleLogout}>
+                    Logout
+                  </Button>
               </ModalFooter>
             </>
           )}

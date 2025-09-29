@@ -2,7 +2,7 @@ import axios from "axios";
 // !============== Add a Comment API ==============! //
 export async function addComment(postId, commentData) {
   const token = localStorage.getItem("token");
-  
+
   const API = `${import.meta.env.VITE_BASE_URL}/comments`;
   const response = await axios.post(
     API,
@@ -35,4 +35,24 @@ export async function DeleteCommentAPI(commentId) {
     console.error("Error deleting comment:", error);
     throw error;
   }
+}
+// !============== Update a Comment API ==============! //
+export async function updateComment(commentId, content) {
+  const token = localStorage.getItem("token");
+
+  const API = `${import.meta.env.VITE_BASE_URL}/comments/${commentId}`;
+  const response = await axios.put(
+    API,
+    {
+      content: content,
+    },
+    {
+      headers: {
+        token: token,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  return response.data;
 }

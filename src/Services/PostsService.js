@@ -75,3 +75,28 @@ export async function deletePostsAPI(id) {
     return error;
   }
 }
+// !========================= git all posts ===========================================
+export async function updatePost(postId, updatedData) {
+  try {
+    const formData = new FormData();
+    
+    // Always append body content (required field)
+    formData.append("body", updatedData.textAreaBody || "");
+    
+    if (updatedData.imgFile) {
+      // User uploaded a new image
+      formData.append("image", updatedData.imgFile);
+    }
+    const API = `${import.meta.env.VITE_BASE_URL}/posts/${postId}`;
+    const res = await axios.put(API, formData, {
+      headers: {
+        token: localStorage.getItem("token"),
+      },
+    });
+
+    return res;
+  } catch (error) {
+    console.error("Error in Updating the post:", error);
+    return error;
+  }
+}

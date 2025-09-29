@@ -15,6 +15,7 @@ export default function DeleteModalComponent({
   deletedComponent,
   type,
 }) {
+  
   return (
     <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
       <ModalContent>

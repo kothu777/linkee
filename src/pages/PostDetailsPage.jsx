@@ -1,45 +1,113 @@
-import { useParams } from "react-router-dom";
-import { getSinglePostsAPI } from "../Services/PostsService";
-import { useCallback, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { getSinglePostsAPI, deletePostsAPI, updatePost } from "../Services/PostsService";
+import { useCallback, useEffect, useState, useContext } from "react";
 import SpinnerComponent from "../components/SpinnerComponent";
 import ErrorPage from "./ErrorPage";
-import { Button, Image } from "@heroui/react";
+import { Button, Image, useDisclosure } from "@heroui/react";
 import { useTimeAgo } from "../hooks/useTimeAgo";
 import Comment from "../components/Comments";
 import AddCommentField from "../components/AddCommentField";
+import { UserDataContext } from "../contexts/userDataContext.jsx";
+import { toast } from "react-toastify";
+import DropDownComponent from "../components/DropDownComponent";
+import DeleteModalComponent from "../components/DeleteModalComponent";
+import UpdateModalComponent from "../components/UpdateModalComponent";
 
 export default function PostDetailsPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
   const [isLiked, setIsLiked] = useState(false);
   const [commentsLimit, setCommentsLimit] = useState(2);
   const [isPinging, setIsPinging] = useState(false);
+  const [isPostDeleting, setIsPostDeleting] = useState(false);
+  const [isPostUpdating, setIsPostUpdating] = useState(false);
   const formatTimeAgo = useTimeAgo();
-  
-const fetchPost = useCallback(async () => {
-  try {
-    setLoading(true);
-    setErrorMessage(null);
+  const { userData } = useContext(UserDataContext);
+  const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onOpenChange: onDeleteOpenChange } = useDisclosure();
+  const { isOpen: isUpdateOpen, onOpen: onUpdateOpen, onOpenChange: onUpdateOpenChange } = useDisclosure();
+  const isPostByLoggedUser = userData?._id === post?.user?._id;
 
-    const { post } = await getSinglePostsAPI(id);
-    setPost(post);
-  } catch (error) {
-    console.error("Error fetching post:", error);
-    setErrorMessage(error?.response?.data?.error);
-  } finally {
-    setLoading(false);
-  }
-}, [id]);
+  // !============= Handle delete post function =============
+  const handleDeletePost = async (postId, onClose) => {
+    try {
+      setIsPostDeleting(true);
+      const res = await deletePostsAPI(postId);
+      if (res?.message === "success") {
+        toast.success("Post deleted successfully", {
+          position: "top-right",
+          autoClose: 1500,
+          hideProgressBar: false,
+        });
+        onClose();
+        navigate("/", { replace: true });
+      }
+    } catch (err) {
+      console.error("Error deleting post:", err);
+      toast.error("Failed to delete post. Please try again.", {
+        position: "top-right",
+        autoClose: 1500,
+        hideProgressBar: false,
+      });
+    } finally {
+      setIsPostDeleting(false);
+    }
+  };
+  // !============= Handle Update post function =============
+  const handleUpdatePost = () => {
+    // Open the update modal when edit is clicked
+    onUpdateOpen();
+  };
 
-useEffect(() => {
-  if (id) {
-    fetchPost();
-  }
-}, [id, fetchPost]);
+  // !============= Handle Save Updated Post =============
+  const handleSaveUpdatedPost = async (updatedData, onClose) => {
+    try {
+      setIsPostUpdating(true);
+      const res = await updatePost(post._id, updatedData);
+      if (res?.data?.message === "success") {
+        await fetchPost(); // Refresh post data
+        toast.success("Post updated successfully", {
+          position: "top-right",
+          autoClose: 1500,
+          hideProgressBar: false,
+        });
+        onClose();
+      }
+    } catch (err) {
+      console.error("Error updating post:", err);
+      toast.error("Failed to update post. Please try again.", {
+        position: "top-right",
+        autoClose: 1500,
+        hideProgressBar: false,
+      });
+    } finally {
+      setIsPostUpdating(false);
+    }
+  };
+  // !============= Handle fetch post details function =============
+  const fetchPost = useCallback(async () => {
+    try {
+      setLoading(true);
+      setErrorMessage(null);
 
-  
+      const { post } = await getSinglePostsAPI(id);
+      setPost(post);
+    } catch (error) {
+      console.error("Error fetching post:", error);
+      setErrorMessage(error?.response?.data?.error);
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      fetchPost();
+    }
+  }, [id, fetchPost]);
+
   const handleShowMoreComments = () => {
     try {
       setLoading(true);
@@ -82,6 +150,14 @@ useEffect(() => {
                 </div>
               </div>
             </div>
+            {isPostByLoggedUser && (
+              <DropDownComponent 
+                handleUpdatePost={handleUpdatePost} 
+                onOpen={onDeleteOpen} 
+                deletedComponent={post} 
+                type={"post"}
+              />
+            )}
           </div>
           <p className="dark:text-slate-200 break-words">{post?.body}</p>
           <div className="py-4">
@@ -183,6 +259,21 @@ useEffect(() => {
           {/* End Comments content */}
         </article>
       )}
+      <UpdateModalComponent
+        isOpen={isUpdateOpen}
+        onOpenChange={onUpdateOpenChange}
+        handleUpdate={handleSaveUpdatedPost}
+        updatedComponent={post}
+        isUpdating={isPostUpdating}
+      />
+      <DeleteModalComponent
+        isOpen={isDeleteOpen}
+        onOpenChange={onDeleteOpenChange}
+        isDeleting={isPostDeleting}
+        handleDelete={handleDeletePost}
+        deletedComponent={post}
+        type={"post"}
+      />
     </>
   );
 }

@@ -3,14 +3,20 @@ import { Button, Input } from "@heroui/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginUser } from "../Services/authServices";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import  { useState } from "react";
+import  { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../contexts/authContext";
+import { UserDataContext } from "../contexts/userDataContext";
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState("");
   const navigate = useNavigate();
+  
+  // Context hooks for updating auth state
+  const { setIsLoggedIn } = useContext(AuthContext);
+  const { setToken } = useContext(UserDataContext);
   // *--------------Start of the useForm hook ------------------
   const {
     handleSubmit,
@@ -34,6 +40,9 @@ export default function LoginPage() {
       // Store token if available
       if (res?.token) {
         localStorage.setItem("token", res.token);
+        // Update context states to trigger user data fetch
+        setToken(res.token);
+        setIsLoggedIn(true);
       }
 
       toast.success("Signin successful!", {
@@ -80,7 +89,6 @@ export default function LoginPage() {
   };
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <ToastContainer />
       <div className="max-w-xl w-full bg-white/80 backdrop-blur-sm py-8 px-8 shadow-2xl rounded-2xl border border-white/50">
         {/* Header */}
         <div className="text-center mb-8">
