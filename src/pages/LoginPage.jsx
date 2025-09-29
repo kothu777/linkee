@@ -5,15 +5,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginUser } from "../Services/authServices";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import  { useState, useContext } from "react";
+import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/authContext";
 import { UserDataContext } from "../contexts/userDataContext";
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  
+
   // Context hooks for updating auth state
   const { setIsLoggedIn } = useContext(AuthContext);
   const { setToken } = useContext(UserDataContext);
@@ -119,7 +120,7 @@ export default function LoginPage() {
 
             <Input
               isRequired
-              type="password"
+              type={showPassword ? "text" : "password"}
               label="Password"
               variant="faded"
               radius="lg"
@@ -127,6 +128,20 @@ export default function LoginPage() {
                 input: "text-sm",
                 inputWrapper: "shadow-sm hover:shadow-md transition-shadow",
               }}
+              endContent={
+                <button
+                  type="button"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="text-slate-500 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-100"
+                >
+                  <i
+                    className={`fa-solid ${
+                      showPassword ? "fa-eye-slash" : "fa-eye"
+                    }`}
+                  ></i>
+                </button>
+              }
               {...register("password")}
               isInvalid={Boolean(errors?.password?.message)}
               errorMessage={errors.password?.message}
