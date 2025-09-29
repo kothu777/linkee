@@ -55,7 +55,7 @@ import { toast } from "react-toastify";
     }
   };
   return (
-    <div className="py-4 mb-4 mx-auto w-full max-w-xl -mt-5 bg-gray-50 shadow-lg rounded-lg px-7">
+    <div className="py-4 mb-4 mx-auto w-full max-w-xl -mt-5 bg-gray-50 dark:bg-slate-800 shadow-lg rounded-lg px-7 border border-slate-200 dark:border-slate-700">
       {showForm ? (
         <form
           className=" w-full flex flex-col gap-2"
@@ -85,10 +85,10 @@ import { toast } from "react-toastify";
           <small
             className={`${
               textAreaBody.length == 5000
-                ? "text-red-500"
+                ? "text-red-500 dark:text-red-400"
                 : textAreaBody.length > 4000
-                ? "text-yellow-500"
-                : "text-gray-400"
+                ? "text-yellow-500 dark:text-yellow-400"
+                : "text-gray-400 dark:text-slate-500"
             } -mt-2`}
           >
             {textAreaBody.length}/5000
@@ -119,7 +119,7 @@ import { toast } from "react-toastify";
           <div className="flex items-center">
             <div className="flex items-center space-x-3">
               {/* Image Upload Button */}
-              <label className="cursor-pointer text-gray-600 hover:text-blue-600 transition duration-200">
+              <label className="cursor-pointer text-gray-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition duration-200">
                 <input
                   // onChange={handleFileChange}
                   type="file"
@@ -128,8 +128,8 @@ import { toast } from "react-toastify";
                   onChange={handleImageUpload}
                   id="fileInput"
                 />
-                <div className="flex items-center">
-                  <i className="fa-regular dark:fa-solid fa-image fa-lg"></i>
+                <div className="flex items-center gap-2">
+                  <i className="fa-regular fa-image fa-lg"></i>
                   <span className="text-sm font-medium">Photo</span>
                 </div>
               </label>
@@ -161,11 +161,11 @@ import { toast } from "react-toastify";
           onPress={() => {
             setShowForm(true);
           }}
-          className="w-full flex justify-start"
+          className="w-full flex justify-start text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-600"
           variant="bordered"
         >
           {" "}
-          What's on your mind, Abdelfattah?
+          What's on your mind?
         </Button>
       )}
     </div>

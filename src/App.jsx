@@ -12,13 +12,29 @@ import ProtectedAuthRoute from "./ProtectedRoutes/ProtectedAuthRoute";
 import React from "react";
 
 function App() {
+
+  // *--------------Start of the router ------------------
   const router = createHashRouter([
     {
       path: "",
       element: <AuthLayout />,
       children: [
-        { path: "login", element: <ProtectedAuthRoute><LoginPage /></ProtectedAuthRoute> },
-        { path: "register", element: <ProtectedAuthRoute><RegisterPage /></ProtectedAuthRoute> },
+        {
+          path: "login",
+          element: (
+            <ProtectedAuthRoute>
+              <LoginPage />
+            </ProtectedAuthRoute>
+          ),
+        },
+        {
+          path: "register",
+          element: (
+            <ProtectedAuthRoute>
+              <RegisterPage />
+            </ProtectedAuthRoute>
+          ),
+        },
       ],
     },
     {
@@ -49,13 +65,13 @@ function App() {
             </ProtectedRoute>
           ),
         },
-        
+
         { path: "*", element: <NotFoundPage /> },
       ],
     },
   ]);
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-white dark:bg-slate-900 transition-colors duration-200">
       <RouterProvider router={router} />
     </div>
   );

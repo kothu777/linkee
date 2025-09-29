@@ -76,14 +76,14 @@ export default function RegisterPage() {
     }
   };
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="max-w-xl w-full bg-white/80 backdrop-blur-sm py-8 px-8 shadow-2xl rounded-2xl border border-white/50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
+      <div className="max-w-xl w-full bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm py-8 px-8 shadow-2xl rounded-2xl border border-white/50 dark:border-slate-700/50">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
             Join Us Today
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-600 dark:text-slate-300 mt-2">
             Create your account to get started
           </p>
         </div>
@@ -205,12 +205,12 @@ export default function RegisterPage() {
 
         {/* Footer */}
         <div className="text-center mt-6">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-slate-400">
             Already have an account?{" "}
             <Link
               to={"/login"}
               replace
-              className="text-blue-600 hover:text-blue-700 cursor-pointer font-medium"
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 cursor-pointer font-medium"
             >
               Sign in here
             </Link>

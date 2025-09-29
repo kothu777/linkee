@@ -16,7 +16,7 @@ import {
   ModalFooter,
   useDisclosure,
 } from "@heroui/react";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { AuthContext } from "../contexts/authContext";
@@ -31,8 +31,9 @@ export default function AppNavbar() {
   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
   const { userData, setToken } = useContext(UserDataContext);
   const navigate = useNavigate();
+  const [theme, setTheme] = useState(null);
 
-  // Safe localStorage operations
+  // !--------------Start of the get token from localStorage  ------------------
   const getStoredToken = () => {
     try {
       return localStorage.getItem("token");
@@ -41,7 +42,7 @@ export default function AppNavbar() {
       return null;
     }
   };
-
+  // !--------------Start of the remove token from localStorage  ------------------
   const removeStoredToken = () => {
     try {
       localStorage.removeItem("token");
@@ -49,13 +50,51 @@ export default function AppNavbar() {
       console.warn("Failed to remove token from localStorage:", error);
     }
   };
-
+  // !--------------Start of the logout button  ------------------
   const handleLogout = () => {
     removeStoredToken();
     setIsLoggedIn(false);
     setToken(null); // Clear user data from context
     navigate("/login", { replace: true });
     onClose(); // Close the modal after logout
+  };
+  // !=================== Start of the theme =============================
+  useEffect(() => {
+    if (!("theme" in localStorage)) {
+      // Check system preference
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        document.documentElement.classList.add("dark");
+        setTheme("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+        setTheme("light");
+      }
+    } else {
+      // Use stored preference
+      const storedTheme = localStorage.getItem("theme");
+      if (storedTheme === "dark") {
+        document.documentElement.classList.add("dark");
+        setTheme("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+        setTheme("light");
+      }
+    }
+  }, []);
+
+  // !--------------Start of the theme toggle button  ------------------
+  const handleThemeToggle = () => {
+    if (theme === "light") {
+      // Switch to dark mode
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+      setTheme("dark");
+    } else {
+      // Switch to light mode
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+      setTheme("light");
+    }
   };
 
   // Check for existing token on mount
@@ -81,6 +120,23 @@ export default function AppNavbar() {
         </NavbarBrand>
 
         <NavbarContent as="div" justify="end">
+          {/* !--------------Start of the theme toggle button  ------------------ */}
+          <NavbarItem>
+            <Button
+              isIconOnly
+              variant="light"
+              aria-label="Toggle theme"
+              onPress={handleThemeToggle}
+              className="text-slate-700 dark:text-slate-200"
+            >
+              <i
+                className={`fa-solid ${
+                  theme === "dark" ? "fa-sun" : "fa-moon"
+                } fa-lg`}
+              ></i>
+            </Button>
+          </NavbarItem>
+          {/* !--------------Start of the login and sign up buttons  ------------------ */}
           {!isLoggedIn ? (
             <>
               <NavbarItem>
@@ -103,47 +159,53 @@ export default function AppNavbar() {
               </NavbarItem>
             </>
           ) : (
-            <Dropdown placement="bottom-end">
-              <DropdownTrigger>
-                <Avatar
-                  isBordered
-                  as="button"
-                  className="transition-all duration-300 cursor-pointer"
-                  color="primary"
-                  name={userName}
-                  size="md"
-                  src={userData?.photo || ""}
-                />
-              </DropdownTrigger>
-              <DropdownMenu aria-label="Profile Actions" variant="flat">
-                <DropdownItem
-                  key="profile"
-                  className="h-14 gap-2 mb-1 bg-blue-50"
-                  textValue={`Signed in as ${userEmail}`}
-                >
-                  <p className="font-semibold text-gray-600">Signed in as</p>
-                  <p className="font-bold text-blue-600">{userEmail}</p>
-                </DropdownItem>
-                <DropdownItem
-                  key="settings"
-                  onPress={() => navigate("/profile", { replace: true })}
-                  textValue="My Profile"
-                >
-                  My Profile
-                </DropdownItem>
-                <DropdownItem key="help_and_feedback" textValue="Help & Feedback">
-                  Help & Feedback
-                </DropdownItem>
-                <DropdownItem
-                  key="logout"
-                  className="border my-1 border-red-700 bg-red-500 text-white text-center hover:!bg-red-500/80 hover:!font-bold hover:!text-white transition-all duration-300"
-                  onPress={onOpen}
-                  textValue="Log Out"
-                >
-                  Log Out
-                </DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
+            <>
+              {/* !--------------Start of the dropdown menu  ------------------ */}
+              <Dropdown placement="bottom-end">
+                <DropdownTrigger>
+                  <Avatar
+                    isBordered
+                    as="button"
+                    className="transition-all duration-300 cursor-pointer"
+                    color="primary"
+                    name={userName}
+                    size="md"
+                    src={userData?.photo || ""}
+                  />
+                </DropdownTrigger>
+                <DropdownMenu aria-label="Profile Actions" variant="flat">
+                  <DropdownItem
+                    key="profile"
+                    className="h-14 gap-2 mb-1 bg-blue-50"
+                    textValue={`Signed in as ${userEmail}`}
+                  >
+                    <p className="font-semibold text-gray-600">Signed in as</p>
+                    <p className="font-bold text-blue-600">{userEmail}</p>
+                  </DropdownItem>
+                  <DropdownItem
+                    key="settings"
+                    onPress={() => navigate("/profile", { replace: true })}
+                    textValue="My Profile"
+                  >
+                    My Profile
+                  </DropdownItem>
+                  <DropdownItem
+                    key="help_and_feedback"
+                    textValue="Help & Feedback"
+                  >
+                    Help & Feedback
+                  </DropdownItem>
+                  <DropdownItem
+                    key="logout"
+                    className="border my-1 border-red-700 bg-red-500 text-white text-center hover:!bg-red-500/80 hover:!font-bold hover:!text-white transition-all duration-300"
+                    onPress={onOpen}
+                    textValue="Log Out"
+                  >
+                    Log Out
+                  </DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
+            </>
           )}
         </NavbarContent>
       </Navbar>
@@ -152,19 +214,19 @@ export default function AppNavbar() {
         <ModalContent>
           {(onClose) => (
             <>
-                <ModalHeader className="flex flex-col gap-1">
-                  Confirm Logout
-                </ModalHeader>
-                <ModalBody>
-                  <p>Are you sure you want to logout?</p>
-                </ModalBody>
-                <ModalFooter>
-                  <Button color="success" variant="light" onPress={onClose}>
-                    Cancel
-                  </Button>
-                  <Button color="danger" onPress={handleLogout}>
-                    Logout
-                  </Button>
+              <ModalHeader className="flex flex-col gap-1">
+                Confirm Logout
+              </ModalHeader>
+              <ModalBody>
+                <p>Are you sure you want to logout?</p>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="success" variant="light" onPress={onClose}>
+                  Cancel
+                </Button>
+                <Button color="danger" onPress={handleLogout}>
+                  Logout
+                </Button>
               </ModalFooter>
             </>
           )}

@@ -122,9 +122,9 @@ export default function AddCommentField({ postId, onCommentAdded = null }) {
         {/* Character counter */}
         <div className="absolute bottom-0 right-2 text-xs">
           <small className={`${
-            commentContent.length == 30 ? "text-red-500" : 
-            commentContent.length > 25 ? "text-yellow-500" : 
-            "text-gray-400"
+            commentContent.length == 30 ? "text-red-500 dark:text-red-400" : 
+            commentContent.length > 25 ? "text-yellow-500 dark:text-yellow-400" : 
+            "text-gray-400 dark:text-slate-500"
           }`}>
             {commentContent.length}/30
           </small>

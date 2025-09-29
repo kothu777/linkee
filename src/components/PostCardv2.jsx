@@ -192,20 +192,20 @@ export default function PostCardV2({ post, fetchAllPosts }) {
           <AddCommentField postId={post?._id} />
           {/* Comments section */}
           {post.comments.length > 0 && (
-            <div className="pt-6 flex flex-col ">
+            <div className="pt-6 flex flex-col bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 rounded-lg">
               {/* Comment row */}
-              <div className="flex flex-col gap-4 mb-4 ">
+              <div className="flex flex-col gap-4 mb-4 px-4 py-3">
                 <Comment comments={post?.comments} postId={post?._id} postOwnerId={post?.user?._id} onCommentDeleted={fetchAllPosts} />
               </div>
 
               {/* End comments row */}
 
               {/* More comments */}
-              <div className="w-full">
+              <div className="w-full px-4 pb-4">
                 <Link
                   to={`/post-details/${post?.id}`}
                   replace
-                  className="py-3 px-4 w-full block bg-slate-100 dark:bg-slate-700 text-center rounded-lg font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition ease-in-out delay-75"
+                  className="py-3 px-4 w-full block bg-slate-100 dark:bg-slate-800 text-center rounded-md font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                 >
                   Show more comments
                 </Link>

@@ -136,7 +136,7 @@ export default function SingleComments({
             width={40}
           />
           <div className="flex flex-col">
-            <h1 className="inline-block text-base font-bold mr-2">
+            <h1 className="inline-block text-base font-bold mr-2 dark:text-white">
               {comment?.commentCreator?.name}
             </h1>
             <small className="text-slate-500 text-xs dark:text-slate-300">
@@ -207,7 +207,7 @@ export default function SingleComments({
           </div>
         ) : (
           <div className="media-body">
-            <p className="break-words text-wrap ms-10">{comment?.content}</p>
+            <p className="break-words text-wrap ms-10 dark:text-slate-200">{comment?.content}</p>
 
             <div
               className="cursor-pointer py-3 ms-2"

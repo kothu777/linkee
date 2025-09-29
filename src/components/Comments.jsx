@@ -15,7 +15,7 @@ export default function Comment({ comments, commentsLimit = 2, postOwnerId, onCo
             <div key={comment._id} className="comment flex flex-col gap-1">
               <SingleComments comment={comment} postOwnerId={postOwnerId} onCommentDeleted={onCommentDeleted} />
               {index + 1 !== commentsLimit && (
-                <Divider className="mb-3 w-4/5 mx-auto" />
+                <Divider className="mb-3 w-4/5 mx-auto bg-slate-200 dark:bg-slate-700" />
               )}
             </div>
           );
