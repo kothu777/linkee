@@ -111,12 +111,12 @@ export default function AppNavbar() {
 
   return (
     <>
-      <Navbar className="shadow bg-slate-100/10 dark:bg-slate-900/80">
+      <Navbar className="shadow bg-slate-100/10 dark:bg-slate-900/90 dark:shadow-lg dark:shadow-black/20 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
         <NavbarBrand>
-          <Link to="/" replace className="flex items-center">
+          <div onClick={()=>{navigate(0, {replace: true})}} className="flex items-center cursor-pointer">
             <LinkeeLogo />
             <p className="font-bold text-blue-500 text-3xl ms-2">LINKEE</p>
-          </Link>
+          </div>
         </NavbarBrand>
 
         <NavbarContent as="div" justify="end">

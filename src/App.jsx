@@ -71,7 +71,7 @@ function App() {
     },
   ]);
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-900 transition-colors duration-200">
+    <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-200">
       <RouterProvider router={router} />
     </div>
   );
