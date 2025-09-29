@@ -2,7 +2,7 @@
 import { Divider } from "@heroui/react";
 import SingleComments from "./SingleComments";
 
-export default function Comment({ comments, commentsLimit = 2 }) {
+export default function Comment({ comments, commentsLimit = 2, postOwnerId, onCommentDeleted }) {
   // !============ handle add comment function   ============!
 
   return (
@@ -13,7 +13,7 @@ export default function Comment({ comments, commentsLimit = 2 }) {
         .map((comment, index) => {
           return (
             <div key={comment._id} className="comment flex flex-col gap-1">
-              <SingleComments comment={comment} />
+              <SingleComments comment={comment} postOwnerId={postOwnerId} onCommentDeleted={onCommentDeleted} />
               {index + 1 !== commentsLimit && (
                 <Divider className="mb-3 w-4/5 mx-auto" />
               )}

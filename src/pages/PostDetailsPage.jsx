@@ -137,6 +137,8 @@ useEffect(() => {
                 <Comment
                   comments={post?.comments}
                   commentsLimit={commentsLimit}
+                  postOwnerId={post?.user?._id}
+                  onCommentDeleted={fetchPost}
                 />
                 {/* End comments row */}
                 {post.comments.length > commentsLimit && (

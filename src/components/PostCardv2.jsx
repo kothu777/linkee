@@ -1,28 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ButtonGroup, Image } from "@heroui/react";
+import { ButtonGroup, Image, useDisclosure } from "@heroui/react";
 import { useTimeAgo } from "../hooks/useTimeAgo";
 import Comment from "./Comments";
 import AddCommentField from "./AddCommentField";
-import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-} from "@heroui/dropdown";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  useDisclosure,
-} from "@heroui/react";
+
+
 import { useContext } from "react";
 import { UserDataContext } from "../contexts/userDataContext.jsx";
 import { deletePostsAPI } from "@/Services/PostsService";
 import { toast } from "react-toastify";
+import DropDownComponent from "./DropDownComponent";
+import DeleteModalComponent from "./DeleteModalComponent";
 // *=====================================================================*
 // *======================== Post Card Component ========================*
 // *=====================================================================*
@@ -30,6 +19,7 @@ export default function PostCardV2({ post, fetchAllPosts }) {
   const [isLiked, setIsLiked] = useState(false);
   const [isPinging, setIsPinging] = useState(false);
   const [showReadMore, setShowReadMore] = useState(false);
+  const [isPostDeleting, setIsPostDeleting] = useState(false);
   const textRef = useRef(null);
   const formatTimeAgo = useTimeAgo();
   const navigate = useNavigate();
@@ -46,19 +36,28 @@ export default function PostCardV2({ post, fetchAllPosts }) {
     }
   }, [post?.body]);
   // !============= Handle delete post function =============
-  const handleDeletePost = async (postId) => {
+  const handleDeletePost = async (postId, onClose) => {
     try {
+      setIsPostDeleting(true);
       const res = await deletePostsAPI(postId);
       if (res?.message === "success") {
-        fetchAllPosts();
+        await fetchAllPosts();
         toast.success("Post deleted successfully", {
           position: "top-right",
           autoClose: 1500,
           hideProgressBar: false,
         });
+        onClose();
       }
     } catch (err) {
       console.error("Error deleting post:", err);
+      toast.error("Failed to delete post. Please try again.", {
+        position: "top-right",
+        autoClose: 1500,
+        hideProgressBar: false,
+      });
+    } finally {
+      setIsPostDeleting(false);
     }
   };
   // !============= Handle Update post function =============
@@ -91,31 +90,7 @@ export default function PostCardV2({ post, fetchAllPosts }) {
             </div>
           </div>
           {isPostByLoggedUser && (
-            <Dropdown>
-              <DropdownTrigger className="rotate-90 cursor-pointer">
-                <ButtonGroup variant="bordered">
-                  <i className="fa-solid fa-ellipsis fa-lg"></i>
-                </ButtonGroup>
-              </DropdownTrigger>
-              <DropdownMenu aria-label="Static Actions">
-                <DropdownItem
-                  key="edit"
-                  onPress={() => {
-                    handleUpdatePost(post._id);
-                  }}
-                >
-                  Edit post
-                </DropdownItem>
-                <DropdownItem
-                  key="delete"
-                  onPress={onOpen}
-                  className="text-danger"
-                  color="danger"
-                >
-                  Delete Post
-                </DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
+           <DropDownComponent handleUpdatePost={handleUpdatePost} onOpen={onOpen} deletedComponent={post} type={"post"}/>
           )}
         </div>
         <div>
@@ -190,7 +165,7 @@ export default function PostCardV2({ post, fetchAllPosts }) {
             <div className="pt-6 flex flex-col ">
               {/* Comment row */}
               <div className="flex flex-col gap-4 mb-4 ">
-                <Comment comments={post?.comments} postId={post?._id} />
+                <Comment comments={post?.comments} postId={post?._id} postOwnerId={post?.user?._id} onCommentDeleted={fetchAllPosts} />
               </div>
 
               {/* End comments row */}
@@ -211,38 +186,8 @@ export default function PostCardV2({ post, fetchAllPosts }) {
         </div>
         {/* End Comments content */}
       </article>
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">
-                Delete Confirmation
-              </ModalHeader>
-              <ModalBody>
-                <p>
-                  Are you sure you want to delete this post? This action cannot
-                  be undone.
-                </p>
-              </ModalBody>
-              <ModalFooter>
-                <Button color="default" variant="ghost" onPress={onClose}>
-                  Close
-                </Button>
-                <Button
-                  color="danger"
-                  variant="shadow"
-                  onPress={() => {
-                    handleDeletePost(post._id);
-                    onClose();
-                  }}
-                >
-                  Delete
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+      {/* Delete Confirmation Modal */}
+      <DeleteModalComponent isOpen={isOpen} onOpenChange={onOpenChange} isDeleting={isPostDeleting} handleDelete={handleDeletePost} deletedComponent={post} type={"post"}/>
     </>
   );
 }

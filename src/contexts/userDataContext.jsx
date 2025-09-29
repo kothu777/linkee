@@ -7,6 +7,7 @@ const UserDataContext = createContext({
 export { UserDataContext };
 export default function UserDataContextProvider({ children }) {
   const [userData, setUserData] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
   async function fetchUserData() {
     try {
       const { user } = await getLoggedUserAPI();
@@ -16,10 +17,14 @@ export default function UserDataContextProvider({ children }) {
     }
   }
   useEffect(() => {
-    fetchUserData();
-  }, []);
+    if(token){
+      fetchUserData();
+    }else{
+      setUserData(null);
+    }
+  }, [token]);
   return (
-    <UserDataContext.Provider value={{ userData, setUserData }}>
+    <UserDataContext.Provider value={{ userData, setUserData, setToken }}>
       {children}
     </UserDataContext.Provider>
   );

@@ -1,5 +1,5 @@
 import axios from "axios";
-
+// !============== Add a Comment API ==============! //
 export async function addComment(postId, commentData) {
   const token = localStorage.getItem("token");
   
@@ -19,4 +19,20 @@ export async function addComment(postId, commentData) {
   );
 
   return response.data;
+}
+
+// !============== Delete a Comment API ==============! //
+export async function DeleteCommentAPI(commentId) {
+  try {
+    const API = `${import.meta.env.VITE_BASE_URL}/comments/${commentId}`;
+    const { data } = await axios.delete(API, {
+      headers: {
+        token: localStorage.getItem("token"),
+      },
+    });
+    return data;
+  } catch (error) {
+    console.error("Error deleting comment:", error);
+    throw error;
+  }
 }
