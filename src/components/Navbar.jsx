@@ -176,11 +176,11 @@ export default function AppNavbar() {
                 <DropdownMenu aria-label="Profile Actions" variant="flat">
                   <DropdownItem
                     key="profile"
-                    className="h-14 gap-2 mb-1 bg-blue-50"
+                    className="h-14 gap-2 mb-1 bg-blue-50 dark:bg-gray-950 cursor-default"
                     textValue={`Signed in as ${userEmail}`}
                   >
-                    <p className="font-semibold text-gray-600">Signed in as</p>
-                    <p className="font-bold text-blue-600">{userEmail}</p>
+                    <p className="font-semibold text-gray-600 dark:text-gray-50">Signed in as</p>
+                    <p className="font-bold text-blue-600 dark:text-blue-500">{userEmail}</p>
                   </DropdownItem>
                   <DropdownItem
                     key="settings"
