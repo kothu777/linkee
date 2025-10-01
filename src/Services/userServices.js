@@ -15,3 +15,21 @@ export async function getLoggedUserAPI() {
         throw error;
     }
 }
+// !=================== Change the user profile image ========================//
+export async function profileImageAPI(photoFile) {
+    try{
+        const API = `${import.meta.env.VITE_BASE_URL}/users/upload-photo`;
+        const token = localStorage.getItem("token");
+        const formData = new FormData();
+        formData.append("photo", photoFile); // Assuming photoFile is the file input
+        const {data} = await axios.put(API, formData, {
+            headers: {
+                token: token,
+            }
+        });
+        return data;
+    }catch(error){
+        console.error("Error in uploading the profile image:", error);
+        throw error;
+    }
+}

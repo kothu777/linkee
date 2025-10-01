@@ -5,7 +5,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import FeedPage from "./pages/FeedPage";
 import PostDetailsPage from "./pages/PostDetailsPage";
-import ProfilePage from "./pages/ProfilePage";
+import ProfilePage from "@/pages/Profile/ProfilePage";
 import NotFoundPage from "./pages/NotFoundPage";
 import ProtectedRoute from "./ProtectedRoutes/ProtectedRoute";
 import ProtectedAuthRoute from "./ProtectedRoutes/ProtectedAuthRoute";

@@ -3,7 +3,6 @@ import {
     ModalContent,
     ModalHeader,
     ModalBody,
-    ModalFooter,
     Button,
   } from "@heroui/react";
   import { Textarea } from "@heroui/input";

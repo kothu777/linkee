@@ -1,10 +1,15 @@
 import { getLoggedUserAPI } from "@/Services/userServices";
 import { createContext, useEffect, useState } from "react";
+
 const UserDataContext = createContext({
   userData: null,
   setUserData: () => {},
+  setToken: () => {},
+  refreshUserData: () => {}, 
 });
+
 export { UserDataContext };
+
 export default function UserDataContextProvider({ children }) {
   const [userData, setUserData] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token") || null);
@@ -13,6 +18,7 @@ export default function UserDataContextProvider({ children }) {
     try {
       const { user } = await getLoggedUserAPI();
       setUserData(user);
+      return user;
     } catch (error) {
       console.error("Error fetching user data:", error);
       // If fetching user data fails (e.g., token expired), clear the token
@@ -21,14 +27,21 @@ export default function UserDataContextProvider({ children }) {
         setToken(null);
         setUserData(null);
       }
+      throw error;
+    }
+  }
+  
+  async function refreshUserData() {
+    if (token) {
+      return await fetchUserData();
     }
   }
   
   // Watch for token changes and fetch user data accordingly
   useEffect(() => {
-    if(token){
+    if (token) {
       fetchUserData();
-    }else{
+    } else {
       setUserData(null);
     }
   }, [token]);
@@ -44,8 +57,16 @@ export default function UserDataContextProvider({ children }) {
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
+  
   return (
-    <UserDataContext.Provider value={{ userData, setUserData, setToken }}>
+    <UserDataContext.Provider 
+      value={{ 
+        userData, 
+        setUserData, 
+        setToken,
+        refreshUserData
+      }}
+    >
       {children}
     </UserDataContext.Provider>
   );
