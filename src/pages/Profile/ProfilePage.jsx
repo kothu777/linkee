@@ -50,7 +50,6 @@ export default function Profile() {
       </div>
     );
   }
-  console.log(userData);
 
   return (
     <div className="flex justify-center items-center min-h-screen">
