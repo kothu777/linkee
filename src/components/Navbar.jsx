@@ -23,7 +23,7 @@ import { AuthContext } from "../contexts/authContext";
 import { UserDataContext } from "@/contexts/userDataContext";
 
 export const LinkeeLogo = () => {
-  return <img src={logo} alt="logo" className="w-9 h-9" />;
+  return <img src={logo} alt="logo" className="size-6 sm:size-9" />;
 };
 
 export default function AppNavbar() {
@@ -115,7 +115,7 @@ export default function AppNavbar() {
         <NavbarBrand>
           <div onClick={()=>{navigate(0, {replace: true})}} className="flex items-center cursor-pointer">
             <LinkeeLogo />
-            <p className="font-bold text-blue-500 text-3xl ms-2">LINKEE</p>
+            <p className="font-bold text-blue-500 text-xl sm:text-2xl  ms-2">LINKEE</p>
           </div>
         </NavbarBrand>
 
