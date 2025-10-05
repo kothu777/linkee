@@ -7,20 +7,21 @@ import { useQuery } from "@tanstack/react-query";
 
 export default function FeedPage() {
   const [allPosts, setAllPosts] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [loadMoreError, setLoadMoreError] = useState(null);
+  
   const loadMoreRef = useRef(null);
-  const POSTS_PER_PAGE = 40;
-
-  // Refs to hold the latest state values to avoid stale closures in callbacks
-  const loadingMoreRef = useRef(false);
-  const hasNextPageRef = useRef(true);
-  const currentPageRef = useRef(1);
+  const observerRef = useRef(null);
+  const POSTS_PER_PAGE = 20;
 
   // Initial posts fetch with useQuery
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["posts", 1, POSTS_PER_PAGE],
     queryFn: () => getAllPostsAPI(1, POSTS_PER_PAGE),
     staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Update state when initial data is fetched
@@ -30,10 +31,8 @@ export default function FeedPage() {
       const paginationInfo = data.paginationInfo;
       const hasNext = paginationInfo?.currentPage < paginationInfo?.numberOfPages;
       setHasNextPage(hasNext);
-
-      // Sync refs with initial state
-      currentPageRef.current = paginationInfo?.currentPage || 1;
-      hasNextPageRef.current = hasNext;
+      setCurrentPage(paginationInfo?.currentPage || 1);
+      setLoadMoreError(null);
     }
   }, [data]);
 
@@ -49,6 +48,7 @@ export default function FeedPage() {
   // Fetch all posts function for refresh
   const fetchAllPosts = useCallback(async () => {
     try {
+      setLoadMoreError(null);
       const response = await getAllPostsAPI(1, POSTS_PER_PAGE);
       const postsData = response?.posts;
       const paginationInfo = response?.paginationInfo;
@@ -57,85 +57,101 @@ export default function FeedPage() {
         setAllPosts(postsData);
         const hasNext = paginationInfo?.currentPage < paginationInfo?.numberOfPages;
         setHasNextPage(hasNext);
-
-        // Sync refs on refresh
-        currentPageRef.current = paginationInfo?.currentPage || 1;
-        hasNextPageRef.current = hasNext;
+        setCurrentPage(paginationInfo?.currentPage || 1);
       }
     } catch (err) {
       console.error("Error fetching posts:", err);
+      setLoadMoreError(err.message || "Failed to refresh posts");
     }
-  }, [POSTS_PER_PAGE]); // Dependency array is now stable
+  }, [POSTS_PER_PAGE]);
 
   // Load more posts function
-  const [loadingMore, setLoadingMore] = useState(false);
-
   const loadMorePosts = useCallback(async () => {
-    // Use refs to check current values, preventing stale closures
-    if (loadingMoreRef.current || !hasNextPageRef.current) return;
+    // Prevent multiple simultaneous calls
+    if (loadingMore || !hasNextPage) return;
 
     try {
-      loadingMoreRef.current = true; // Set ref immediately
       setLoadingMore(true);
-
-      const nextPage = currentPageRef.current + 1;
-
+      setLoadMoreError(null);
+      
+      const nextPage = currentPage + 1;
       const response = await getAllPostsAPI(nextPage, POSTS_PER_PAGE);
       const newPosts = response?.posts;
       const paginationInfo = response?.paginationInfo;
 
       if (newPosts && newPosts.length > 0) {
-        setAllPosts((prevPosts) => [...prevPosts, ...newPosts]);
+        setAllPosts((prevPosts) => {
+          // Prevent duplicate posts
+          const existingIds = new Set(prevPosts.map(post => post.id));
+          const uniqueNewPosts = newPosts.filter(post => !existingIds.has(post.id));
+          return [...prevPosts, ...uniqueNewPosts];
+        });
+        
         const hasNext = paginationInfo?.currentPage < paginationInfo?.numberOfPages;
         setHasNextPage(hasNext);
-
-        // Sync refs with new state
-        currentPageRef.current = paginationInfo?.currentPage || nextPage;
-        hasNextPageRef.current = hasNext;
+        setCurrentPage(paginationInfo?.currentPage || nextPage);
       } else {
         setHasNextPage(false);
-        hasNextPageRef.current = false;
       }
     } catch (err) {
       console.error("Error loading more posts:", err);
+      setLoadMoreError(err.message || "Failed to load more posts");
+      // Don't update hasNextPage on error, allow retry
     } finally {
-      loadingMoreRef.current = false; // Set ref immediately
       setLoadingMore(false);
     }
-  }, [POSTS_PER_PAGE]); // Dependency array is now stable
+  }, [currentPage, hasNextPage, loadingMore, POSTS_PER_PAGE]);
 
-  // IntersectionObserver for infinite scroll
+  // Setup IntersectionObserver for infinite scroll
   useEffect(() => {
-    const currentRef = loadMoreRef.current;
-    if (!currentRef || isLoading) return;
+    // Clean up previous observer
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
+    }
 
+    // Don't set up observer if we're in initial loading, there's no more pages, or already loading more
+    if (isLoading || !hasNextPage || loadingMore) return;
+
+    const currentRef = loadMoreRef.current;
+    if (!currentRef) return;
+
+    // Create new observer
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
-        
-        if (entry.isIntersecting && !loadingMoreRef.current && hasNextPageRef.current) {
+        if (entry.isIntersecting) {
           loadMorePosts();
         }
       },
       {
         root: null,
-        rootMargin: "200px", // Start loading 200px before the element is visible
+        rootMargin: "200px",
         threshold: 0.1,
       }
     );
 
+    observerRef.current = observer;
     observer.observe(currentRef);
 
+    // Cleanup function
     return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef);
+      if (observer) {
+        observer.disconnect();
       }
     };
-  }, [isLoading, loadMorePosts]);
+  }, [isLoading, hasNextPage, loadingMore, loadMorePosts]);
 
   // Retry function for errors
   const handleRetry = () => {
+    setLoadMoreError(null);
     refetch();
+  };
+
+  // Retry loading more
+  const handleRetryLoadMore = () => {
+    setLoadMoreError(null);
+    loadMorePosts();
   };
 
   // Initial loading state
@@ -186,10 +202,11 @@ export default function FeedPage() {
   }
 
   // Empty state
-  if (allPosts.length === 0) {
+  if (allPosts.length === 0 && !loadingMore) {
     return (
       <div className="flex flex-col gap-3 mx-auto min-h-screen items-center justify-center p-3 w-full max-w-2xl">
-        <div className="text-center text-gray-500">
+        <CreatePost fetchAllPosts={fetchAllPosts} />
+        <div className="text-center text-gray-500 mt-8">
           <div className="mb-4">
             <svg
               className="mx-auto h-12 w-12 text-gray-400"
@@ -220,12 +237,27 @@ export default function FeedPage() {
 
       {/* Posts list */}
       <main role="main" aria-label="Posts feed" className="w-full">
-        {allPosts.map((post, index) => (
-          <article key={`${post?.id}-${index}`} className="w-full">
+        {allPosts.map((post) => (
+          <article key={post?.id || `post-${Math.random()}`} className="w-full">
             <PostCardV2 post={post} fetchAllPosts={fetchAllPosts} />
           </article>
         ))}
       </main>
+
+      {/* Load more error */}
+      {loadMoreError && (
+        <div className="py-4 text-center">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-600 mb-2">{loadMoreError}</p>
+            <button
+              onClick={handleRetryLoadMore}
+              className="text-sm px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+            >
+              Retry Loading More
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Loading more indicator */}
       {loadingMore && (
@@ -247,7 +279,7 @@ export default function FeedPage() {
       )}
 
       {/* Load more sentinel */}
-      {hasNextPage && !loadingMore && (
+      {hasNextPage && !loadingMore && !loadMoreError && (
         <div
           ref={loadMoreRef}
           className="h-10 w-full"
