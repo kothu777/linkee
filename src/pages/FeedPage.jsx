@@ -7,10 +7,14 @@ import { useQuery } from "@tanstack/react-query";
 
 export default function FeedPage() {
   const [allPosts, setAllPosts] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(true);
   const loadMoreRef = useRef(null);
-  const POSTS_PER_PAGE = 20;
+  const POSTS_PER_PAGE = 40;
+
+  // Refs to hold the latest state values to avoid stale closures in callbacks
+  const loadingMoreRef = useRef(false);
+  const hasNextPageRef = useRef(true);
+  const currentPageRef = useRef(1);
 
   // Initial posts fetch with useQuery
   const { data, isLoading, isError, error, refetch } = useQuery({
@@ -23,8 +27,13 @@ export default function FeedPage() {
   useEffect(() => {
     if (data) {
       setAllPosts(data.posts || []);
-      setCurrentPage(1);
-      setHasNextPage(data.paginationInfo?.nextPage ? true : false);
+      const paginationInfo = data.paginationInfo;
+      const hasNext = paginationInfo?.currentPage < paginationInfo?.numberOfPages;
+      setHasNextPage(hasNext);
+
+      // Sync refs with initial state
+      currentPageRef.current = paginationInfo?.currentPage || 1;
+      hasNextPageRef.current = hasNext;
     }
   }, [data]);
 
@@ -46,23 +55,30 @@ export default function FeedPage() {
 
       if (postsData) {
         setAllPosts(postsData);
-        setCurrentPage(1);
-        setHasNextPage(paginationInfo?.nextPage ? true : false);
+        const hasNext = paginationInfo?.currentPage < paginationInfo?.numberOfPages;
+        setHasNextPage(hasNext);
+
+        // Sync refs on refresh
+        currentPageRef.current = paginationInfo?.currentPage || 1;
+        hasNextPageRef.current = hasNext;
       }
     } catch (err) {
       console.error("Error fetching posts:", err);
     }
-  }, [POSTS_PER_PAGE]);
+  }, [POSTS_PER_PAGE]); // Dependency array is now stable
 
   // Load more posts function
   const [loadingMore, setLoadingMore] = useState(false);
 
   const loadMorePosts = useCallback(async () => {
-    if (loadingMore || !hasNextPage) return;
+    // Use refs to check current values, preventing stale closures
+    if (loadingMoreRef.current || !hasNextPageRef.current) return;
 
     try {
+      loadingMoreRef.current = true; // Set ref immediately
       setLoadingMore(true);
-      const nextPage = currentPage + 1;
+
+      const nextPage = currentPageRef.current + 1;
 
       const response = await getAllPostsAPI(nextPage, POSTS_PER_PAGE);
       const newPosts = response?.posts;
@@ -70,40 +86,52 @@ export default function FeedPage() {
 
       if (newPosts && newPosts.length > 0) {
         setAllPosts((prevPosts) => [...prevPosts, ...newPosts]);
-        setCurrentPage(nextPage);
-        setHasNextPage(paginationInfo?.nextPage ? true : false);
+        const hasNext = paginationInfo?.currentPage < paginationInfo?.numberOfPages;
+        setHasNextPage(hasNext);
+
+        // Sync refs with new state
+        currentPageRef.current = paginationInfo?.currentPage || nextPage;
+        hasNextPageRef.current = hasNext;
       } else {
         setHasNextPage(false);
+        hasNextPageRef.current = false;
       }
     } catch (err) {
       console.error("Error loading more posts:", err);
     } finally {
+      loadingMoreRef.current = false; // Set ref immediately
       setLoadingMore(false);
     }
-  }, [currentPage, loadingMore, hasNextPage, POSTS_PER_PAGE]);
+  }, [POSTS_PER_PAGE]); // Dependency array is now stable
 
   // IntersectionObserver for infinite scroll
   useEffect(() => {
-    if (!loadMoreRef.current || isLoading || !hasNextPage) return;
+    const currentRef = loadMoreRef.current;
+    if (!currentRef || isLoading) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
-        if (entry.isIntersecting && !loadingMore && hasNextPage) {
+        
+        if (entry.isIntersecting && !loadingMoreRef.current && hasNextPageRef.current) {
           loadMorePosts();
         }
       },
       {
         root: null,
-        rootMargin: "100px",
+        rootMargin: "200px", // Start loading 200px before the element is visible
         threshold: 0.1,
       }
     );
 
-    observer.observe(loadMoreRef.current);
+    observer.observe(currentRef);
 
-    return () => observer.disconnect();
-  }, [loadMorePosts, isLoading, loadingMore, hasNextPage]);
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [isLoading, loadMorePosts]);
 
   // Retry function for errors
   const handleRetry = () => {
@@ -222,13 +250,9 @@ export default function FeedPage() {
       {hasNextPage && !loadingMore && (
         <div
           ref={loadMoreRef}
-          className="py-6 text-center text-slate-500 dark:text-slate-400"
-          style={{ minHeight: "50px" }}
-        >
-          <div className="flex items-center justify-center">
-            <span>Scroll for more posts...</span>
-          </div>
-        </div>
+          className="h-10 w-full"
+          aria-hidden="true"
+        />
       )}
 
       {/* End of posts indicator */}

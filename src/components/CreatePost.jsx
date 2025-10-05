@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Textarea } from "@heroui/input";
 import { addPost } from "../Services/PostsService";
 import { toast } from "react-toastify";
+import { ImageIcon } from "./icons/ImageIcon";
 // import imageImage from "../assets/testImage.jpg";
 // *===================================================*
 // *============== Create Post Component ==============*
@@ -106,7 +107,10 @@ import { toast } from "react-toastify";
                   rounded
                   onPress={removeUploadedImg}
                 >
-                  <i className="fa-solid fa-xmark"></i>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
                 </Button>
                 <Image
                   src={imgPreview}
@@ -129,7 +133,7 @@ import { toast } from "react-toastify";
                   id="fileInput"
                 />
                 <div className="flex items-center gap-2">
-                  <i className="fa-regular fa-image fa-lg"></i>
+                  <ImageIcon className="w-5 h-5" />
                   <span className="text-sm font-medium">Photo</span>
                 </div>
               </label>

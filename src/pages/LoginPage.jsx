@@ -9,6 +9,7 @@ import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/authContext";
 import { UserDataContext } from "../contexts/userDataContext";
+import { EyeIcon, EyeOffIcon } from "../components/icons/EyeIcon";
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState("");
@@ -135,11 +136,11 @@ export default function LoginPage() {
                   onClick={() => setShowPassword((v) => !v)}
                   className="text-slate-500 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-100"
                 >
-                  <i
-                    className={`fa-solid ${
-                      showPassword ? "fa-eye-slash" : "fa-eye"
-                    }`}
-                  ></i>
+                  {showPassword ? (
+                    <EyeOffIcon className="w-5 h-5" />
+                  ) : (
+                    <EyeIcon className="w-5 h-5" />
+                  )}
                 </button>
               }
               {...register("password")}

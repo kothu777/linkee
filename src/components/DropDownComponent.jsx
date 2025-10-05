@@ -5,6 +5,8 @@ import {
   DropdownItem,
 } from "@heroui/dropdown";
 import { ButtonGroup } from "@heroui/react";
+import { MenuIcon } from "./icons/MenuIcon";
+
 export default function DropDownComponent({
   handleUpdatePost,
   onOpen,
@@ -14,7 +16,7 @@ export default function DropDownComponent({
     <Dropdown>
       <DropdownTrigger className="rotate-90 ms-auto cursor-pointer">
         <ButtonGroup variant="bordered">
-          <i className="fa-solid fa-ellipsis fa-lg"></i>
+          <MenuIcon className="w-5 h-5" />
         </ButtonGroup>
       </DropdownTrigger>
       <DropdownMenu aria-label="Static Actions">

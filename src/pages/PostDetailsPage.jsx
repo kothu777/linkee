@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import DropDownComponent from "../components/DropDownComponent";
 import DeleteModalComponent from "../components/DeleteModalComponent";
 import UpdateModalComponent from "../components/UpdateModalComponent";
+import { MessageIcon } from "../components/icons/MessageIcon";
 
 export default function PostDetailsPage() {
   const { id } = useParams();
@@ -196,8 +197,8 @@ export default function PostDetailsPage() {
               </span>
             </div>
             {/* Number of comments */}
-            <div className="cursor-pointer">
-              <i className="fa-regular fa-comment"></i>
+            <div className="cursor-pointer flex items-center gap-2">
+              <MessageIcon className="w-5 h-5" />
               {`${post?.comments?.length || 0} Comment${
                 post?.comments?.length > 1 ? "s" : ""
               }`}

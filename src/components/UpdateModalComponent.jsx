@@ -9,6 +9,9 @@ import {
 import { Image } from "@heroui/react";
 import { useState, useRef, useEffect } from "react";
 import { toast } from "react-toastify";
+import { CloseIcon } from "./icons/CloseIcon";
+import { WarningIcon } from "./icons/WarningIcon";
+import { ImageIcon } from "./icons/ImageIcon";
 
 export default function UpdateModalComponent({
   isOpen,
@@ -193,7 +196,7 @@ export default function UpdateModalComponent({
                         onPress={removeUploadedImg}
                         isDisabled={isUpdating}
                       >
-                        <i className="fa-solid fa-xmark"></i>
+                        <CloseIcon className="w-4 h-4" />
                       </Button>
                       <Image
                         src={imgPreview}
@@ -205,7 +208,7 @@ export default function UpdateModalComponent({
                   {/* Show message when original image is removed */}
                   {removeOriginalImage && !imgPreview && updatedComponent?.image && (
                     <div className="w-full max-w-md mx-auto p-6 border-2 border-dashed border-yellow-300 dark:border-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center">
-                      <i className="fa-solid fa-exclamation-triangle text-3xl text-yellow-500 mb-2"></i>
+                      <WarningIcon className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
                       <p className="text-yellow-700 dark:text-yellow-300 text-sm font-medium mb-2">
                         Image Removal Not Supported
                       </p>
@@ -256,7 +259,7 @@ export default function UpdateModalComponent({
                       disabled={isUpdating}
                     />
                     <div className="flex items-center gap-2">
-                      <i className="fa-regular fa-image fa-lg"></i>
+                      <ImageIcon className="w-5 h-5" />
                       <span className="text-sm font-medium">
                         {imgFile ? "Change Photo" : "Add Photo"}
                       </span>

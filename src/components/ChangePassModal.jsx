@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form";
 import { changePasswordAPI } from "@/Services/userServices";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { EyeIcon, EyeOffIcon } from "./icons/EyeIcon";
 export default function ChangePassModal({ isOpen, onOpenChange }) {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -115,11 +116,11 @@ export default function ChangePassModal({ isOpen, onOpenChange }) {
                       onClick={() => setShowCurrentPassword((v) => !v)} // FIX: Use dedicated toggle
                       className="text-slate-500 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-100 transition-colors"
                     >
-                      <i
-                        className={`fa-solid ${
-                          showCurrentPassword ? "fa-eye" : "fa-eye-slash"
-                        }`}
-                      ></i>
+                      {showCurrentPassword ? (
+                        <EyeIcon className="w-5 h-5" />
+                      ) : (
+                        <EyeOffIcon className="w-5 h-5" />
+                      )}
                     </button>
                   }
                   {...register("password")}
@@ -146,11 +147,11 @@ export default function ChangePassModal({ isOpen, onOpenChange }) {
                       onClick={() => setShowNewPassword((v) => !v)}
                       className="text-slate-500 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-100 transition-colors"
                     >
-                      <i
-                        className={`fa-solid ${
-                          showNewPassword ? "fa-eye" : "fa-eye-slash"
-                        }`}
-                      ></i>
+                      {showNewPassword ? (
+                        <EyeIcon className="w-5 h-5" />
+                      ) : (
+                        <EyeOffIcon className="w-5 h-5" />
+                      )}
                     </button>
                   }
                   {...register("newPassword")}
@@ -177,11 +178,11 @@ export default function ChangePassModal({ isOpen, onOpenChange }) {
                       onClick={() => setShowConfirmPassword((v) => !v)}
                       className="text-slate-500 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-100 transition-colors"
                     >
-                      <i
-                        className={`fa-solid ${
-                          showConfirmPassword ? "fa-eye" : "fa-eye-slash"
-                        }`}
-                      ></i>
+                      {showConfirmPassword ? (
+                        <EyeIcon className="w-5 h-5" />
+                      ) : (
+                        <EyeOffIcon className="w-5 h-5" />
+                      )}
                     </button>
                   }
                   {...register("confirmNewPassword")}

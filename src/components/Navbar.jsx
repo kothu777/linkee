@@ -21,6 +21,7 @@ import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { AuthContext } from "../contexts/authContext";
 import { UserDataContext } from "@/contexts/userDataContext";
+import { SunIcon, MoonIcon } from "./icons/ThemeIcons";
 
 export const LinkeeLogo = () => {
   return <img src={logo} alt="logo" className="size-6 sm:size-9" />;
@@ -129,11 +130,11 @@ export default function AppNavbar() {
               onPress={handleThemeToggle}
               className="text-slate-700 dark:text-slate-200"
             >
-              <i
-                className={`fa-solid ${
-                  theme === "dark" ? "fa-sun" : "fa-moon"
-                } fa-lg`}
-              ></i>
+              {theme === "dark" ? (
+                <SunIcon className="w-6 h-6" />
+              ) : (
+                <MoonIcon className="w-6 h-6" />
+              )}
             </Button>
           </NavbarItem>
           {/* !--------------Start of the login and sign up buttons  ------------------ */}
