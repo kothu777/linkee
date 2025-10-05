@@ -93,7 +93,6 @@ export default function FeedPage() {
       // Calculate next page from current state
       const nextPage = pageInfo.currentPage + 1;
       
-      console.log('Loading page:', nextPage, 'Current:', pageInfo.currentPage, 'Total:', pageInfo.totalPages);
       
       const response = await getAllPostsAPI(nextPage, POSTS_PER_PAGE);
       const newPosts = response?.posts;
@@ -157,7 +156,6 @@ export default function FeedPage() {
       const [entry] = entries;
       
       if (entry.isIntersecting && !isLoadingRef.current && pageInfo.hasNextPage) {
-        console.log('Intersection detected, loading more...');
         loadMorePosts();
       }
     };
