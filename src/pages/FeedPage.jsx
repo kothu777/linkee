@@ -10,11 +10,11 @@ export default function FeedPage() {
   const [pageInfo, setPageInfo] = useState({
     currentPage: 1,
     totalPages: 0,
-    hasNextPage: true
+    hasNextPage: true,
   });
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadMoreError, setLoadMoreError] = useState(null);
-  
+
   const loadMoreRef = useRef(null);
   const observerRef = useRef(null);
   const isLoadingRef = useRef(false); // Prevent concurrent loads
@@ -33,13 +33,15 @@ export default function FeedPage() {
     if (data) {
       setAllPosts(data.posts || []);
       const paginationInfo = data.paginationInfo;
-      
+
       setPageInfo({
         currentPage: paginationInfo?.currentPage || 1,
         totalPages: paginationInfo?.numberOfPages || 0,
-        hasNextPage: (paginationInfo?.currentPage || 1) < (paginationInfo?.numberOfPages || 0)
+        hasNextPage:
+          (paginationInfo?.currentPage || 1) <
+          (paginationInfo?.numberOfPages || 0),
       });
-      
+
       setLoadMoreError(null);
       isLoadingRef.current = false;
     }
@@ -59,7 +61,7 @@ export default function FeedPage() {
     try {
       setLoadMoreError(null);
       isLoadingRef.current = false;
-      
+
       const response = await getAllPostsAPI(1, POSTS_PER_PAGE);
       const postsData = response?.posts;
       const paginationInfo = response?.paginationInfo;
@@ -69,7 +71,9 @@ export default function FeedPage() {
         setPageInfo({
           currentPage: paginationInfo?.currentPage || 1,
           totalPages: paginationInfo?.numberOfPages || 0,
-          hasNextPage: (paginationInfo?.currentPage || 1) < (paginationInfo?.numberOfPages || 0)
+          hasNextPage:
+            (paginationInfo?.currentPage || 1) <
+            (paginationInfo?.numberOfPages || 0),
         });
       }
     } catch (err) {
@@ -89,11 +93,10 @@ export default function FeedPage() {
       isLoadingRef.current = true;
       setLoadingMore(true);
       setLoadMoreError(null);
-      
+
       // Calculate next page from current state
       const nextPage = pageInfo.currentPage + 1;
-      
-      
+
       const response = await getAllPostsAPI(nextPage, POSTS_PER_PAGE);
       const newPosts = response?.posts;
       const paginationInfo = response?.paginationInfo;
@@ -101,28 +104,32 @@ export default function FeedPage() {
       if (newPosts && newPosts.length > 0) {
         // Add new posts, filtering duplicates
         setAllPosts((prevPosts) => {
-          const existingIds = new Set(prevPosts.map(post => post?.id));
-          const uniqueNewPosts = newPosts.filter(post => post?.id && !existingIds.has(post.id));
-          
+          const existingIds = new Set(prevPosts.map((post) => post?.id));
+          const uniqueNewPosts = newPosts.filter(
+            (post) => post?.id && !existingIds.has(post.id)
+          );
+
           if (uniqueNewPosts.length === 0) {
-            console.warn('No unique posts to add');
+            console.warn("No unique posts to add");
             return prevPosts;
           }
-          
+
           return [...prevPosts, ...uniqueNewPosts];
         });
-        
+
         // Update page info based on response
         setPageInfo({
           currentPage: paginationInfo?.currentPage || nextPage,
           totalPages: paginationInfo?.numberOfPages || pageInfo.totalPages,
-          hasNextPage: (paginationInfo?.currentPage || nextPage) < (paginationInfo?.numberOfPages || 0)
+          hasNextPage:
+            (paginationInfo?.currentPage || nextPage) <
+            (paginationInfo?.numberOfPages || 0),
         });
       } else {
         // No more posts
-        setPageInfo(prev => ({
+        setPageInfo((prev) => ({
           ...prev,
-          hasNextPage: false
+          hasNextPage: false,
         }));
       }
     } catch (err) {
@@ -132,7 +139,12 @@ export default function FeedPage() {
       isLoadingRef.current = false;
       setLoadingMore(false);
     }
-  }, [pageInfo.currentPage, pageInfo.hasNextPage, pageInfo.totalPages, POSTS_PER_PAGE]);
+  }, [
+    pageInfo.currentPage,
+    pageInfo.hasNextPage,
+    pageInfo.totalPages,
+    POSTS_PER_PAGE,
+  ]);
 
   // Setup IntersectionObserver
   useEffect(() => {
@@ -154,15 +166,19 @@ export default function FeedPage() {
     // Create observer with callback
     const observerCallback = (entries) => {
       const [entry] = entries;
-      
-      if (entry.isIntersecting && !isLoadingRef.current && pageInfo.hasNextPage) {
+
+      if (
+        entry.isIntersecting &&
+        !isLoadingRef.current &&
+        pageInfo.hasNextPage
+      ) {
         loadMorePosts();
       }
     };
 
     const observer = new IntersectionObserver(observerCallback, {
       root: null,
-      rootMargin: '100px', // Trigger 100px before element is visible
+      rootMargin: "100px", // Trigger 100px before element is visible
       threshold: 0.01, // Lower threshold for better detection
     });
 
@@ -280,7 +296,10 @@ export default function FeedPage() {
       {/* Posts list */}
       <main role="main" aria-label="Posts feed" className="w-full">
         {allPosts.map((post) => (
-          <article key={post?.id || `post-${Math.random()}`} className="w-full mb-3">
+          <article
+            key={post?.id || `post-${Math.random()}`}
+            className="w-full mb-3"
+          >
             <PostCardV2 post={post} fetchAllPosts={fetchAllPosts} />
           </article>
         ))}
