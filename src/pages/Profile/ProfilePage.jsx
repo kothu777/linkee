@@ -1,5 +1,6 @@
 import React from "react";
 import { useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { UserDataContext } from "@/contexts/userDataContext.jsx";
 import { Button, Divider, Image, useDisclosure } from "@heroui/react";
 import ProfileImageModal from "@/components/ProfileImageModal";
@@ -7,8 +8,10 @@ import SpinnerComponent from "@/components/SpinnerComponent";
 import { toast } from "react-toastify";
 import ChangePassModal from "@/components/ChangePassModal";
 import { EditIcon } from "@/components/icons/EditIcon";
+import { ArrowRightIcon } from "@/components/icons/ArrowRightIcon";
 
 export default function Profile() {
+  const navigate = useNavigate();
   const {
     isOpen: isImgUploadOpen,
     onOpen: onImgUploadOpen,
@@ -55,6 +58,18 @@ export default function Profile() {
   return (
     <div className="flex justify-center items-center min-h-screen">
       <article className="p-6 bg-white dark:bg-gray-800 rounded-lg drop-shadow-xl w-full max-w-2xl">
+        {/* Back button */}
+        <Button
+          isIconOnly
+          variant="light"
+          size="sm"
+          onPress={() => navigate("/")}
+          className="mb-4 hover:bg-gray-100 dark:hover:bg-gray-700"
+          aria-label="Back to feed"
+        >
+          <ArrowRightIcon className="w-5 h-5 rotate-180 text-gray-700 dark:text-gray-200" />
+        </Button>
+        
         <header className="flex justify-start items-center gap-4">
           <div className="relative">
             <Image

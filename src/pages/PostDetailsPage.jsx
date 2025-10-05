@@ -13,6 +13,7 @@ import DropDownComponent from "../components/DropDownComponent";
 import DeleteModalComponent from "../components/DeleteModalComponent";
 import UpdateModalComponent from "../components/UpdateModalComponent";
 import { MessageIcon } from "../components/icons/MessageIcon";
+import { ArrowRightIcon } from "../components/icons/ArrowRightIcon";
 
 export default function PostDetailsPage() {
   const { id } = useParams();
@@ -132,6 +133,18 @@ export default function PostDetailsPage() {
         setErrorMessage("Post not found")
       ) : (
         <article className="my-4 mx-auto break-inside p-6 max-w-xl shadow-xl rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex flex-col bg-clip-border">
+          {/* Back button */}
+          <Button
+            isIconOnly
+            variant="light"
+            size="sm"
+            onPress={() => navigate("/")}
+            className="mb-4 w-fit hover:bg-gray-100 dark:hover:bg-gray-700"
+            aria-label="Back to feed"
+          >
+            <ArrowRightIcon className="w-5 h-5 rotate-180 text-gray-700 dark:text-gray-200" />
+          </Button>
+          
           <div className="flex pb-6 items-center justify-between">
             <div className="flex gap-2">
               <Image
