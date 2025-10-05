@@ -79,10 +79,10 @@ export async function deletePostsAPI(id) {
 export async function updatePost(postId, updatedData) {
   try {
     const formData = new FormData();
-    
+
     // Always append body content (required field)
     formData.append("body", updatedData.textAreaBody || "");
-    
+
     if (updatedData.imgFile) {
       // User uploaded a new image
       formData.append("image", updatedData.imgFile);

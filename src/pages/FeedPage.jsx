@@ -3,18 +3,32 @@ import { getAllPostsAPI } from "../Services/PostsService";
 import PostCardV2 from "../components/PostCardv2";
 import SkeletonCard from "../components/SkeletonCard";
 import CreatePost from "../components/CreatePost";
+import { useQuery } from "@tanstack/react-query";
 
 export default function FeedPage() {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(null);
+  const [allPosts, setAllPosts] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(true);
   const loadMoreRef = useRef(null);
   const POSTS_PER_PAGE = 20;
 
-  // !=============Memoize skeleton cards to prevent unnecessary re-renders=============
+  // Initial posts fetch with useQuery
+  const { data, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ["posts", 1, POSTS_PER_PAGE],
+    queryFn: () => getAllPostsAPI(1, POSTS_PER_PAGE),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  // Update state when initial data is fetched
+  useEffect(() => {
+    if (data) {
+      setAllPosts(data.posts || []);
+      setCurrentPage(1);
+      setHasNextPage(data.paginationInfo?.nextPage ? true : false);
+    }
+  }, [data]);
+
+  // Memoize skeleton cards to prevent unnecessary re-renders
   const skeletonCards = useMemo(
     () =>
       [...Array(5)].map((_, index) => (
@@ -23,41 +37,28 @@ export default function FeedPage() {
     []
   );
 
-  // !=============Initial posts fetch - start from page 1 and go forward=============
-  const fetchAllPosts = async () => {
+  // Fetch all posts function for refresh
+  const fetchAllPosts = useCallback(async () => {
     try {
-      setLoading(true);
-      setError(null);
-
-      // todo:------ call the API to get the posts ------
       const response = await getAllPostsAPI(1, POSTS_PER_PAGE);
       const postsData = response?.posts;
       const paginationInfo = response?.paginationInfo;
 
-      if (!postsData) {
-        throw new Error("No posts data received");
+      if (postsData) {
+        setAllPosts(postsData);
+        setCurrentPage(1);
+        setHasNextPage(paginationInfo?.nextPage ? true : false);
       }
-
-      // todo:------ Set posts ------
-      setPosts(postsData);
-      setCurrentPage(1);
-
-      // todo:------ Check if there are more pages to load (going forward) ------
-      setHasNextPage(paginationInfo?.nextPage ? true : false);
     } catch (err) {
-      console.error("Error fetching initial posts:", err);
-      setError("Failed to load posts. Please try again.");
-    } finally {
-      setLoading(false);
+      console.error("Error fetching posts:", err);
     }
-  };
+  }, [POSTS_PER_PAGE]);
 
-  useEffect(() => {
-    fetchAllPosts();
-  }, []);
-  // !=============Load more posts function - goes forward through pages=============
+  // Load more posts function
+  const [loadingMore, setLoadingMore] = useState(false);
+
   const loadMorePosts = useCallback(async () => {
-    if (loadingMore || !hasNextPage || currentPage === null) return;
+    if (loadingMore || !hasNextPage) return;
 
     try {
       setLoadingMore(true);
@@ -68,28 +69,22 @@ export default function FeedPage() {
       const paginationInfo = response?.paginationInfo;
 
       if (newPosts && newPosts.length > 0) {
-        // !============= Add new posts without any sorting - trust API order =============
-        setPosts((prevPosts) => [...prevPosts, ...newPosts]);
-
+        setAllPosts((prevPosts) => [...prevPosts, ...newPosts]);
         setCurrentPage(nextPage);
-
-        // !============= Check if there are more pages to load (going forward) =============
         setHasNextPage(paginationInfo?.nextPage ? true : false);
       } else {
-        // !============= No more posts available =============
         setHasNextPage(false);
       }
     } catch (err) {
       console.error("Error loading more posts:", err);
-      // !============= Don't show error for load more, just log it =============
     } finally {
       setLoadingMore(false);
     }
-  }, [currentPage, loadingMore, hasNextPage]);
+  }, [currentPage, loadingMore, hasNextPage, POSTS_PER_PAGE]);
 
-  // !=============IntersectionObserver for infinite scroll=============
+  // IntersectionObserver for infinite scroll
   useEffect(() => {
-    if (!loadMoreRef.current || loading || !hasNextPage) return;
+    if (!loadMoreRef.current || isLoading || !hasNextPage) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -108,16 +103,15 @@ export default function FeedPage() {
     observer.observe(loadMoreRef.current);
 
     return () => observer.disconnect();
-  }, [loadMorePosts, loading, loadingMore, hasNextPage]);
+  }, [loadMorePosts, isLoading, loadingMore, hasNextPage]);
 
-  // !=============Retry function for errors=============
+  // Retry function for errors
   const handleRetry = () => {
-    setError(null);
-    fetchAllPosts();
+    refetch();
   };
 
-  // !=============Initial loading state=============
-  if (loading) {
+  // Initial loading state
+  if (isLoading) {
     return (
       <div className="flex flex-col gap-3 mx-auto min-h-screen items-center p-3 pt-8 w-full max-w-2xl">
         <div className="flex items-center flex-col justify-center gap-3">
@@ -127,8 +121,8 @@ export default function FeedPage() {
     );
   }
 
-  // !=============Error state=============
-  if (error) {
+  // Error state
+  if (isError) {
     return (
       <div className="flex flex-col gap-3 mx-auto min-h-screen items-center justify-center p-3 w-full max-w-2xl">
         <div className="text-center text-red-500">
@@ -149,7 +143,7 @@ export default function FeedPage() {
           </div>
           <h3 className="text-lg font-medium mb-2">Something went wrong</h3>
           <p className="mb-4" role="alert">
-            {error}
+            {error?.message || "Failed to load posts. Please try again."}
           </p>
           <button
             onClick={handleRetry}
@@ -163,8 +157,8 @@ export default function FeedPage() {
     );
   }
 
-  // !=============Empty state=============
-  if (posts.length === 0) {
+  // Empty state
+  if (allPosts.length === 0) {
     return (
       <div className="flex flex-col gap-3 mx-auto min-h-screen items-center justify-center p-3 w-full max-w-2xl">
         <div className="text-center text-gray-500">
@@ -190,22 +184,22 @@ export default function FeedPage() {
     );
   }
 
-  // !=============Posts display=============
+  // Posts display
   return (
     <div className="flex flex-col gap-3 mx-auto min-h-screen items-center p-3 pt-8 w-full max-w-2xl">
-      {/* !============= Create Post ============= */}
+      {/* Create Post */}
       <CreatePost fetchAllPosts={fetchAllPosts} />
 
-      {/* !============= Posts list ============= */}
+      {/* Posts list */}
       <main role="main" aria-label="Posts feed" className="w-full">
-        {posts.map((post, index) => (
+        {allPosts.map((post, index) => (
           <article key={`${post?.id}-${index}`} className="w-full">
             <PostCardV2 post={post} fetchAllPosts={fetchAllPosts} />
           </article>
         ))}
       </main>
 
-      {/* !============= Loading more indicator ============= */}
+      {/* Loading more indicator */}
       {loadingMore && (
         <div className="py-6 text-center">
           <div
@@ -224,7 +218,7 @@ export default function FeedPage() {
         </div>
       )}
 
-      {/* !============= Load more sentinel ============= */}
+      {/* Load more sentinel */}
       {hasNextPage && !loadingMore && (
         <div
           ref={loadMoreRef}
@@ -237,8 +231,8 @@ export default function FeedPage() {
         </div>
       )}
 
-      {/* !============= End of posts indicator ============= */}
-      {!hasNextPage && posts.length > 0 && (
+      {/* End of posts indicator */}
+      {!hasNextPage && allPosts.length > 0 && (
         <div className="py-8 text-center text-slate-400 dark:text-slate-500">
           <div className="flex items-center justify-center gap-2">
             <div className="w-16 h-px bg-slate-300 dark:bg-slate-600"></div>
