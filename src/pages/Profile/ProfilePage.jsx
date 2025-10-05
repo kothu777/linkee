@@ -6,6 +6,7 @@ import ProfileImageModal from "@/components/ProfileImageModal";
 import SpinnerComponent from "@/components/SpinnerComponent";
 import { toast } from "react-toastify";
 import ChangePassModal from "@/components/ChangePassModal";
+import { EditIcon } from "@/components/icons/EditIcon";
 
 export default function Profile() {
   const {
@@ -67,11 +68,11 @@ export default function Profile() {
             <Button
               onPress={onImgUploadOpen}
               isIconOnly
-              variant="default"
-              className="fa-stack fa-sm z-50 absolute right-0 bottom-0 cursor-pointer dark:text-black shadow-lg"
+              size="sm"
+              className="absolute z-20 right-0 bottom-0 bg-white dark:bg-gray-700 rounded-full p-2 shadow-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+              aria-label="Edit profile image"
             >
-              <i className="fa-solid fa-circle fa-stack-2x"></i>
-              <i className="fa-regular fa-pen-to-square fa-stack-1x fa-inverse"></i>
+              <EditIcon className="w-4 h-4 text-gray-700 dark:text-gray-200" />
             </Button>
           </div>
           <div className="flex flex-col items-start">

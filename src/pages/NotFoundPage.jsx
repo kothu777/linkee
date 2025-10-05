@@ -33,7 +33,7 @@ export default function NotFoundPage() {
 
   const popularPages = [
     { name: 'Home', path: '/', icon: '🏠' },
-    { name: 'Profile', path: '/profilePage', icon: '👤' },
+    { name: 'Profile', path: '/profile', icon: '👤' },
   ];
 
   return (

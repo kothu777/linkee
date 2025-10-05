@@ -10,6 +10,7 @@ import {
 } from "@heroui/react";
 import { useState } from "react";
 import { toast } from "react-toastify";
+import { EditIcon } from "@/components/icons/EditIcon";
 
 export default function ProfileImageModal({
   isOpen,
@@ -89,27 +90,20 @@ export default function ProfileImageModal({
                   className="object-cover max-h-96 max-w-xs rounded-lg"
                   src={imgPreview}
                 />
-                <Button
-                  isIconOnly
-                  variant="default"
-                  className="fa-stack fa-sm z-50 absolute right-2 bottom-2 cursor-pointer dark:text-black shadow-lg"
-                  as="div"
+                <label
+                  htmlFor="inputField"
+                  className="absolute right-2 z-20 bottom-2 bg-white dark:bg-gray-700 rounded-full p-2 shadow-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors flex items-center justify-center"
+                  aria-label="Change image"
                 >
-                  <label
-                    htmlFor="inputField"
-                    className="h-full flex justify-center px-4 cursor-pointer items-center"
-                  >
-                    <input
-                      id="inputField"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageSelect}
-                      hidden
-                    />
-                    <i className="fa-solid fa-circle fa-stack-2x"></i>
-                    <i className="fa-regular fa-pen-to-square fa-stack-1x fa-inverse"></i>
-                  </label>
-                </Button>
+                  <input
+                    id="inputField"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                    hidden
+                  />
+                  <EditIcon className="w-5 h-5 text-gray-700 dark:text-gray-200" />
+                </label>
               </div>
             </ModalBody>
             <ModalFooter>
